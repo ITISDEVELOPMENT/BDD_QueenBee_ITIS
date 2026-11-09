@@ -13,7 +13,6 @@ INSERT INTO cooperative (nom, site_id) VALUES
   ('Coopérative Bouaké Apicole',    (SELECT id FROM site WHERE nom = 'Bouaké')),
   ('Coopérative Ouest Cameroun',    (SELECT id FROM site WHERE nom = 'Bafoussam'));
 
--- deux homonymes « Aminata Diop » et une « Awa Diop »
 INSERT INTO apicultrice (nom, telephone, site_id) VALUES
   ('Aminata Diop',   '+221 77 100 01 01', (SELECT id FROM site WHERE nom = 'Casamance')),
   ('Awa Diop',       '+221 77 100 02 02', (SELECT id FROM site WHERE nom = 'Casamance')),

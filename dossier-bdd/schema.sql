@@ -1,20 +1,20 @@
 DROP TABLE IF EXISTS adhesion, inspection, mesure, cooperative, apicultrice, site, ruche, alerte, utilisateur, recolte CASCADE;
 
 CREATE TABLE site (
-    id   SERIAL PRIMARY KEY,
+    id   uuid PRIMARY KEY,
     nom  VARCHAR(50)  NOT NULL,
     pays VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE apicultrice (
-    id        SERIAL PRIMARY KEY,
+    id        uuid PRIMARY KEY,
     nom       VARCHAR(50) NOT NULL,
     telephone VARCHAR(50) NOT NULL,
     site_id   INTEGER NOT NULL CONSTRAINT apicultrice_site_fk REFERENCES site(id)
 );
 
 CREATE TABLE cooperative (
-    id      SERIAL PRIMARY KEY,
+    id      uuid PRIMARY KEY,
     nom     VARCHAR(50) NOT NULL,
     site_id INTEGER NOT NULL CONSTRAINT cooperative_site_fk REFERENCES site(id)
 );
@@ -27,7 +27,7 @@ CREATE TABLE adhesion (
 );
 
 CREATE TABLE ruche (
-    id                SERIAL PRIMARY KEY,
+    id                uuid PRIMARY KEY,
     code              VARCHAR(50) NOT NULL UNIQUE,
     latitude          numeric(8,5),
     longitude         numeric(8,5),
@@ -37,7 +37,7 @@ CREATE TABLE ruche (
 );
 
 CREATE TABLE alerte (
-    id               SERIAL PRIMARY KEY,
+    id               uuid PRIMARY KEY,
     type_alerte      VARCHAR(255) NOT NULL,
     niveau_confiance SMALLINT NOT NULL CHECK (niveau_confiance BETWEEN 0 AND 100),
     date_alerte      DATE NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE alerte (
 );
 
 CREATE TABLE mesure (
-    id              SERIAL PRIMARY KEY,
+    id              uuid PRIMARY KEY,
     horodatage      timestamptz NOT NULL,
     poids_kg        numeric(6,2),
     temp_int_c      numeric(4,1),
@@ -59,7 +59,7 @@ CREATE TABLE mesure (
 );
 
 CREATE TABLE inspection (
-    id              SERIAL PRIMARY KEY,
+    id              uuid PRIMARY KEY,
     date_inspection DATE NOT NULL,
     etat_colonie    VARCHAR(255),
     presence_reine  BOOLEAN,
@@ -70,7 +70,7 @@ CREATE TABLE inspection (
 
 -- login non unique : contrainte posée au lab 4
 CREATE TABLE utilisateur (
-    id                SERIAL PRIMARY KEY,
+    id                uuid PRIMARY KEY,
     login             VARCHAR(100) NOT NULL,
     mot_de_passe_hash VARCHAR(255) NOT NULL,
     role              VARCHAR(100) NOT NULL
@@ -80,7 +80,7 @@ CREATE TABLE utilisateur (
 );
 
 CREATE TABLE recolte (
-    id              SERIAL PRIMARY KEY,
+    id              uuid PRIMARY KEY,
     date_recolte    DATE NOT NULL,
     quantite_kg     numeric(8,2) NOT NULL CHECK (quantite_kg >= 0),
     statut          VARCHAR(100) NOT NULL CHECK (statut IN ('déclarée', 'validée')),
