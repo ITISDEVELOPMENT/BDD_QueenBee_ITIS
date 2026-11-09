@@ -23,11 +23,11 @@ ROLLBACK;
 
 -- 3. Insertion : un site sans ruche est refusé (ruche_code nul)
 ALTER TABLE extrait_plat ADD PRIMARY KEY (ruche_code, horodatage);
-INSERT INTO extrait_plat (site_id, site_nom, pays) VALUES (5, 'Douala', 'Cameroun');
+INSERT INTO extrait_plat (site_id, site_nom, pays) VALUES ('CM-DOUA', 'Douala', 'Cameroun');
 
 -- 5.2 Nettoyage, après l'échec de migration_3nf.sql (duplicate key)
 SELECT site_id, array_agg(DISTINCT pays) FROM extrait_plat
-GROUP BY site_id HAVING count(DISTINCT pays) > 1;       -- site 2 : Senegal / Sénégal
+GROUP BY site_id HAVING count(DISTINCT pays) > 1;       -- SN-KOLD : Senegal / Sénégal
 
 SELECT ruche_code, array_agg(DISTINCT telephone) FROM extrait_plat
 GROUP BY ruche_code HAVING count(DISTINCT telephone) > 1;   -- SN-KOLD-011

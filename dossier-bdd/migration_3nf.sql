@@ -3,7 +3,7 @@ DROP SCHEMA IF EXISTS norm CASCADE;
 CREATE SCHEMA norm;
 
 CREATE TABLE norm.site (
-    site_id   integer PRIMARY KEY,
+    site_id   varchar(10)  PRIMARY KEY,
     site_nom  varchar(50)  NOT NULL,
     pays      varchar(255) NOT NULL
 );
@@ -16,7 +16,7 @@ CREATE TABLE norm.apicultrice (
 
 CREATE TABLE norm.ruche (
     ruche_code  varchar(50) PRIMARY KEY,
-    site_id     integer     NOT NULL REFERENCES norm.site(site_id),
+    site_id     varchar(10) NOT NULL REFERENCES norm.site(site_id),
     telephone   varchar(50) NOT NULL REFERENCES norm.apicultrice(telephone)
 );
 

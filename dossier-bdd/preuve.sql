@@ -14,11 +14,11 @@ UNION ALL
 (SELECT * FROM norm.reconstruit EXCEPT SELECT * FROM extrait_plat);
 
 -- Second pays pour un site existant : refusé
-INSERT INTO norm.site VALUES (2, 'Kolda', 'Senegal');
+INSERT INTO norm.site VALUES ('SN-KOLD', 'Kolda', 'Senegal');
 
 -- Site sans ruche : accepté (annulé ensuite)
 BEGIN;
-INSERT INTO norm.site VALUES (5, 'Douala', 'Cameroun');
+INSERT INTO norm.site VALUES ('CM-DOUA', 'Douala', 'Cameroun');
 ROLLBACK;
 
 -- Enquête par pays : attendu 3 pays

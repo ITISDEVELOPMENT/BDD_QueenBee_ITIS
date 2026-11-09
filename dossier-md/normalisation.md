@@ -57,7 +57,7 @@ personnes peuvent partager un numéro.
 `migration_3nf.sql` crée les quatre tables puis les remplit avec `INSERT … SELECT DISTINCT`.
 
 - Lancée sur les données **corrompues** (1 ligne `Senegal`, 1 ligne avec un autre téléphone), elle **échoue** :
-  `ERROR: duplicate key value violates unique constraint "site_pkey" — Key (site_id)=(2) already exists`.
+  `ERROR: duplicate key value violates unique constraint "site_pkey" — Key (site_id)=(SN-KOLD) already exists`.
   La clé primaire refuse qu'un site ait deux pays. Une fois le pays corrigé, elle échoue sur la ruche :
   `"ruche_pkey" — Key (ruche_code)=(SN-KOLD-011) already exists` (deux téléphones pour une ruche).
 - Après nettoyage (`UPDATE` des deux valeurs minoritaires), elle passe : **4 sites, 8 apicultrices, 11 ruches, 528 mesures**.

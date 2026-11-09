@@ -1,11 +1,11 @@
 BEGIN;
 SELECT setseed(0.42);
 
-INSERT INTO site (nom, pays) VALUES
-  ('Casamance',  'Sénégal'),
-  ('Kolda',      'Sénégal'),
-  ('Bouaké',     'Côte d''Ivoire'),
-  ('Bafoussam',  'Cameroun');
+INSERT INTO site (id, nom, pays) VALUES
+  ('SN-CASA', 'Casamance',  'Sénégal'),
+  ('SN-KOLD', 'Kolda',      'Sénégal'),
+  ('CI-BOUA', 'Bouaké',     'Côte d''Ivoire'),
+  ('CM-BAFO', 'Bafoussam',  'Cameroun');
 
 INSERT INTO cooperative (nom, site_id) VALUES
   ('Coopérative Miel de Casamance', (SELECT id FROM site WHERE nom = 'Casamance')),
@@ -24,7 +24,7 @@ INSERT INTO apicultrice (nom, telephone, site_id) VALUES
   ('Nadège Mbarga',  '+237 6 70 40 08 08', (SELECT id FROM site WHERE nom = 'Bafoussam'));
 
 INSERT INTO adhesion (apicultrice_id, cooperative_id, date_adhesion)
-SELECT a.id, c.id, DATE '2025-01-15' + (a.id * 10)
+SELECT a.id, c.id, DATE '2025-01-15' + (row_number() OVER (ORDER BY a.telephone))::int * 10
 FROM apicultrice a JOIN cooperative c ON c.site_id = a.site_id;
 
 INSERT INTO ruche (code, latitude, longitude, date_installation, site_id, apicultrice_id) VALUES
@@ -44,13 +44,14 @@ INSERT INTO ruche (code, latitude, longitude, date_installation, site_id, apicul
 INSERT INTO mesure (ruche_id, horodatage, poids_kg, temp_int_c, temp_ext_c, humidite_pct, activite_sonore, batterie_pct)
 SELECT r.id,
        TIMESTAMPTZ '2026-11-08 00:00+00' + h * INTERVAL '30 minutes',
-       round((25 + r.id * 1.3 + h * 0.02 + random() * 0.4)::numeric, 2),
+       round((25 + r.n * 1.3 + h * 0.02 + random() * 0.4)::numeric, 2),
        round((34 + random() * 2)::numeric, 1),
        round((22 + 8 * sin(h * pi() / 24) + random())::numeric, 1),
        55 + floor(random() * 20)::int,
        30 + floor(random() * 40)::int,
        100 - (h / 6)::int
-FROM ruche r CROSS JOIN generate_series(0, 47) AS h;
+FROM (SELECT id, row_number() OVER (ORDER BY code) AS n FROM ruche) AS r  -- n : rang de la ruche (1 à 11)
+CROSS JOIN generate_series(0, 47) AS h;
 
 INSERT INTO utilisateur (login, mot_de_passe_hash, role, site_id, apicultrice_id)
 SELECT lower(left(a.nom, 1)) || '.' || lower(split_part(a.nom, ' ', 2)),
@@ -74,10 +75,10 @@ FROM (VALUES
 ) AS d(code, dt, etat, reine, obs)
 JOIN ruche r ON r.code = d.code;
 
-INSERT INTO recolte (date_recolte, quantite_kg, statut, date_validation, site_id, validee_par) VALUES
-  ('2026-10-25', 42.50, 'validée',  '2026-10-27', (SELECT id FROM site WHERE nom = 'Casamance'), (SELECT id FROM utilisateur WHERE login = 'coord.casamance')),
-  ('2026-10-30', 18.00, 'déclarée', NULL,         (SELECT id FROM site WHERE nom = 'Kolda'), NULL),
-  ('2026-11-02', 27.30, 'déclarée', NULL,         (SELECT id FROM site WHERE nom = 'Bouaké'), NULL);
+INSERT INTO recolte (date_recolte, quantite_kg, statut, date_validation, ruche_id, validee_par) VALUES
+  ('2026-10-25', 42.50, 'validée',  '2026-10-27', (SELECT id FROM ruche WHERE code = 'SN-CASA-014'), (SELECT id FROM utilisateur WHERE login = 'coord.casamance')),
+  ('2026-10-30', 18.00, 'déclarée', NULL,         (SELECT id FROM ruche WHERE code = 'SN-KOLD-011'), NULL),
+  ('2026-11-02', 27.30, 'déclarée', NULL,         (SELECT id FROM ruche WHERE code = 'CI-BOUA-005'), NULL);
 
 -- 2 alertes ouvertes, sur 2 sites
 INSERT INTO alerte (type_alerte, niveau_confiance, date_alerte, statut, ruche_id) VALUES
