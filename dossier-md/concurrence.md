@@ -52,11 +52,11 @@ Terminal A à gauche, terminal B à droite :
 - `course_jeton.py` (RT-f.ba-10 et -11) : 2 sessions à chaque fois.
 - `course_jeton_corrige.py` (RT-f.ba-12 et -13) : un accepté, un refusé, 1 session.
 
-<!-- IMG : course_jeton.py : 2 sessions -->
-<!-- ![Course 9.3](../images/course-py9-3.png) -->
+La version vulnérable vérifie (`SELECT`), attend, puis agit : les deux requêtes voient le jeton libre et ouvrent
+chacune une session. La version corrigée vérifie et agit dans un seul `UPDATE … WHERE utilise_le IS NULL … RETURNING` :
+la seconde requête attend la fin de la première, puis ne trouve plus de jeton libre.
 
-<!-- IMG : course_jeton_corrige.py : 1 session -->
-<!-- ![Course corrigée 9.3](../images/course-corrige9-3.png) -->
+![Course 9.3](../images/concurrence/course-python_9-3.png)
 
 ## Étape 9.4 · Les quatre corrections
 
