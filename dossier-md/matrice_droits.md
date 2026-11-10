@@ -8,9 +8,10 @@
 | `ruche_id` de `mesure`, `inspection`, `recolte`, `alerte` | `RESTRICT` | ce sont des preuves, on ne doit pas les effacer en supprimant une ruche |
 
 Test : `DELETE FROM ruche WHERE code = 'CI-MAN-012';` est refusé par `mesure_ruche_fk`. 
-Avec `CASCADE` (dans un `BEGIN` / `ROLLBACK`), la même commande efface la ruche et environ 4 368 mesures sans message.
 
 ![REFUS 8.1](../images/matrice/reference8-1.png) 
+
+Avec `CASCADE` (dans un `BEGIN` / `ROLLBACK`), la même commande efface la ruche et environ 4 368 mesures sans message.
 
 ![CASCADE 8.1](../images/matrice/cascade8-1.png) 
 
@@ -20,6 +21,7 @@ Avec `CASCADE` (dans un `BEGIN` / `ROLLBACK`), la même commande efface la ruche
 `check.sql` ajoute six contraintes `CHECK` (batterie, humidité, poids, rôle, statut d'alerte, statut de récolte).
 
 ![CHECK 8.1](../images/matrice/check8-2.png) 
+
 
 ## Étape 8.3 · Limite du journal d'audit
 
@@ -31,6 +33,7 @@ puis le réactiver. C'est pourquoi le journal doit aussi être copié hors de la
 
 <!-- IMG : UPDATE, DELETE, TRUNCATE sur le journal : trois refus -->
 <!-- ![Journal protégé 8.3](../images/journal-refus8-3.png) -->
+
 
 ## Étape 8.4 · La matrice (à remplir avant d'écrire le moindre GRANT)
 
@@ -50,12 +53,14 @@ puis le réactiver. C'est pourquoi le journal doit aussi être copié hors de la
 <!-- IMG : droits sur les vues (\dp) -->
 <!-- ![Droits 8.4](../images/droits8-4.png) -->
 
+
 ## Étape 8.5 · `valider_recolte`
 
 _À compléter si besoin._
 
 <!-- IMG : validation par coord.sn, puis message d'erreur -->
 <!-- ![Validation 8.5](../images/validation8-5.png) -->
+
 
 ## Étape 8.6 · Tests de contournement
 
