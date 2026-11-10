@@ -41,3 +41,27 @@ SELECT a.id, f.id
 FROM formation_plat p
 JOIN apicultrice a ON a.telephone = p.telephone
 JOIN formateur f   ON f.nom = p.formateur;
+
+-- 6.3
+CREATE OR REPLACE FUNCTION suivi_un_formateur_par_theme() RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF EXISTS (
+     SELECT 1
+     FROM suivi_formation s
+     JOIN formateur f       ON f.id = s.formateur_id
+     JOIN formateur nouveau ON nouveau.id = NEW.formateur_id
+     WHERE s.apicultrice_id = NEW.apicultrice_id
+       AND s.formateur_id <> NEW.formateur_id
+       AND f.theme = nouveau.theme
+  ) THEN
+     RAISE EXCEPTION 'DF violée : cette apicultrice a déjà un formateur pour ce thème';
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER suivi_formation_df
+BEFORE INSERT OR UPDATE ON suivi_formation
+FOR EACH ROW EXECUTE FUNCTION suivi_un_formateur_par_theme();
+
