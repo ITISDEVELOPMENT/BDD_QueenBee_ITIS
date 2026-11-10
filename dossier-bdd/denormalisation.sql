@@ -100,3 +100,24 @@ SELECT * FROM v_export_bailleur ORDER BY pays, site, latitude;
 SELECT position((SELECT cle FROM cle_pseudonymisation) IN definition) > 0 AS contient_la_cle
 FROM pg_views WHERE viewname = 'v_export_bailleur';
 -- Résultat : f (la clé n'est pas écrite dans la vue)
+
+-- 7.4
+DROP TABLE IF EXISTS journal_audit CASCADE;
+CREATE TABLE journal_audit (
+    id          bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    horodatage  timestamptz NOT NULL DEFAULT clock_timestamp(),
+    acteur      text NOT NULL,
+    table_cible text NOT NULL,
+    operation   text NOT NULL CHECK (operation IN ('INSERT', 'UPDATE', 'DELETE')),
+    ligne_id    text,
+    avant       jsonb,
+    apres       jsonb
+);
+REVOKE ALL ON journal_audit FROM PUBLIC;
+
+-- 7.4 Le journal existe et personne d'autre que postgres n'y a accès
+SELECT count(*) FROM journal_audit;
+-- Résultat : 0 (il sera rempli par le trigger d'audit au lab 8)
+
+SELECT has_table_privilege('public', 'journal_audit', 'SELECT') AS public_peut_lire;
+-- Résultat : f
