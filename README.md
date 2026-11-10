@@ -63,3 +63,5 @@ Le résultat attendu est en commentaire sous chaque requête. Ceux qui doivent �
 - `anomalies.sql`, `migration_3nf.sql`, `preuve.sql` : jour 1, lab 5
 - jour 2 : à la fin de chaque fichier (`formation.sql`, `volume.sql`, `denormalisation.sql`, `references.sql`,
   `check.sql`, `audit.sql`, `roles.sql`)
+- `tests_contournement.sql` : lab 8.6, les 12 tentatives de contournement (lancé en `postgres`, sans `ON_ERROR_STOP`,
+  après `roles.sql`). Il modifie la base exprès : chaque lancement ajoute une récolte validée et deux lignes au journal.
