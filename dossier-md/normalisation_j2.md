@@ -9,7 +9,7 @@
 
 Les trois tests `GROUP BY … HAVING` renvoient 0 ligne : les données respectent ces règles.
 
-![Tests 6.1](../images/tests6-1.png)
+![Tests 6.1](../images/normalisation/tests6-1.png)
 
 
 ### Clés candidates
@@ -30,7 +30,7 @@ Dans une transaction annulée (`BEGIN` … `ROLLBACK`), On a passé Moussa Sarr 
 La table accepte la modification sans erreur : Moussa Sarr enseigne deux thèmes, et la règle
 `formateur -> theme` est violée.
 
-![Anomalie 6.1](../images/anomalie6-1.png)
+![Anomalie 6.1](../images/normalisation/anomalie6-1.png)
 
 
 ## Étape 6.2 · Découper, et prouver qu'on n'a rien perdu
@@ -42,7 +42,7 @@ d'aucun des deux morceaux : un thème a plusieurs formateurs. La jointure donne 
 8 inventées. Par exemple, Awa Diop (`+221 77 100 00 02`, Fatou Ba dans l'énoncé) serait suivie par trois
 formateurs varroa.
 
-![Tbl_Temp 6.2](../images/table-temp6-2.png)
+![Tbl_Temp 6.2](../images/normalisation/table-temp6-2.png)
 
 ### Le bon découpage (BCNF)
 
@@ -56,7 +56,7 @@ change, on le modifie à un seul endroit (dans `apicultrice`).
 Preuve : 5 formateurs, 8 suivis, et la double comparaison `EXCEPT` avec la table d'origine renvoie 0 ligne dans
 les deux sens : rien de perdu, rien d'inventé.
 
-![Preuve 6.2](../images/preuve6-2.png)
+![Preuve 6.2](../images/normalisation/preuve6-2.png)
 
 
 
@@ -77,7 +77,7 @@ Résultat : `Awa Diop | varroa | {"Ibrahima Fall","Moussa Sarr"}`.
 - Chez Ibrahima Fall (varroa) : refusé, `DF violée : cette apicultrice a déjà un formateur pour ce thème`.
 - Chez Khady Ndiaye (récolte, thème nouveau) : accepté, `INSERT 0 1`.
 
-![TRIGGER 6.3](../images/trigger6-3.png)
+![TRIGGER 6.3](../images/normalisation/trigger6-3.png)
 
 ### Pour aller plus loin : changer le thème d'un formateur
 
@@ -110,7 +110,7 @@ changement si une des apicultrices de ce formateur a déjà un autre formateur p
 | suivi_formation | (apicultrice_id, formateur_id), aucune autre colonne | oui | oui |
 | formation_plat | formateur -> theme | **non** | **non** (3NF seulement, voir 6.1) |
 
-![REVUE 6.4](../images/revue6-4.png)
+![REVUE 6.4](../images/normalisation/revue6-4.png)
 
 Chaque apicultrice n'a de ruches que sur son site.
 
@@ -155,12 +155,12 @@ autres `apicultrice_id` est vide.
 
 `volume.sql` : 90 jours de mesures par ruche, une toutes les 30 minutes (`INSERT 0 47520`).
 
-![VOLUME 7.1](../images/tdb-7-1.png)
+![VOLUME 7.1](../images/normalisation/tdb-7-1.png)
 
 Tableau de bord du gestionnaire (UC-G01), site SN-CASA,
 `EXPLAIN ANALYZE` : 192 mesures par jour, Execution Time de 46.396 ms (`Seq Scan on mesure` : toute la table est lue).
 
-![EXPLAIN 7.1](../images/explain7-1.png)
+![EXPLAIN 7.1](../images/normalisation/explain7-1.png)
 
 
 ## Étape 7.2 · La synthèse, et son prix
@@ -170,46 +170,54 @@ Vue matérialisée `synthese_site_jour`.
 - Temps sur la table `mesure` : 46.396 ms
 - Temps sur la vue : 0.028 ms
 
-![EXPLAIN 7.2](../images/explain7-2.png)
+![EXPLAIN 7.2](../images/normalisation/explain7-2.png)
 
 ### Le vol (UC-CY04)
 
-Le 15 mars à 6 h, SN-CASA-014 passe à 8,4 kg (la SN-CASA-011 de l'énoncé n'existe pas chez nous). Le 15 mars n'apparaît dans la vue qu'après le `REFRESH`.
+Le 15 mars à 6 h, SN-CASA-014 passe à 8,4 kg (la SN-CASA-011 de l'énoncé n'existe pas chez nous). 
+Le 15 mars n'apparaît dans la vue qu'après le `REFRESH`.
 
-![VOL 7.2](../images/ajoutvol7-2.png)
+![VOL 7.2](../images/normalisation/ajoutvol7-2.png)
 
-Si la vue n'est rafraîchie que la nuit, le vol reste invisible jusqu'au prochain rafraîchissement, soit plusieurs heures (jusqu'à 24 h au pire). Il faut donc détecter un vol dans les mesures brutes, pas dans la synthèse.
+Si la vue n'est rafraîchie que la nuit, le vol reste invisible jusqu'au prochain rafraîchissement, soit plusieurs heures (jusqu'à 24 h au pire). Il faut donc détecter un vol dans les mesures brutes.
 
 
 ## Étape 7.3 · L'export pour le bailleur
 
 ### Casser un haché simple
 
-Le haché `sha256` du téléphone d'Awa Diop (Fatou Ba dans l'énoncé) se casse en essayant tous les numéros qui
-commencent par `+221 77 1` : un million de possibilités. On retrouve `+221 77 100 00 02` en 2,1 s. Un simple haché
-ne protège donc pas un téléphone.
+Le `sha256` du téléphone de Fatou Ba se casse en essayant tous les numéros qui commencent par `+221 77 1` :
+on retrouve `+221 77 100 00 02` en environ 2 s. Un simple hachage ne protègera pas ces numéros de téléphone.
 
 ### Le bon export
 
-`cle_pseudonymisation` contient une clé tirée au hasard, fermée à tout le monde (`REVOKE ALL ... FROM PUBLIC`). La
-vue `v_export_bailleur` donne un pseudonyme calculé avec `hmac()` sur l'id de l'apicultrice : sans la clé, on ne
-peut pas le recalculer. Résultat : 8 lignes pour 11 ruches, et la vérification renvoie `f`, la clé n'est pas
-écrite dans la définition de la vue.
+La vue `v_export_bailleur` utilise un pseudonyme `hmac()` calculé avec une clé secrète, stockée dans
+`cle_pseudonymisation` (fermée à tous). 
+Résultat : 8 lignes pour 11 ruches, et la clé n'apparaît pas dans la définition de la vue (tel que `f`).
 
-Attention, dans notre schéma le statut s'écrit `validée` avec un accent, pas `validee` comme dans l'énoncé : avec
-`validee`, le total des récoltes serait toujours vide.
+![EXPORT 7.3](../images/normalisation/export7-3.png)
 
-### Les colonnes retirées
+### Colonnes retirées
 
-- le nom et le téléphone de l'apicultrice : ils permettent de la reconnaître directement ;
-- l'id de l'apicultrice : il est remplacé par le pseudonyme, sinon on pourrait faire le lien avec la base ;
-- le code de la ruche : il est unique, donc il permettrait de remonter à la ruche puis à l'apicultrice ;
-- la position exacte : arrondie à 0,1 degré (environ 11 km), sinon on pourrait retrouver l'endroit précis des
-  ruches, et donc la personne ou un rucher à voler ;
-- les mesures, inspections et alertes : le bailleur n'en a pas besoin, on n'exporte que le total des récoltes
-  validées.
+| Colonne | Pourquoi |
+|---------|----------|
+| nom, téléphone | identifient directement l'apicultrice |
+| id de l'apicultrice | remplacé par le pseudonyme |
+| code de la ruche | unique, permet de remonter à l'apicultrice |
+| position exacte | arrondie à 0,1° (environ 11 km) pour ne pas localiser les ruches |
+| mesures, inspections, alertes | inutiles au bailleur, on ne garde que le total des récoltes validées |
 
-Le pseudonyme reste une donnée personnelle au sens du RGPD : celui qui a la clé peut retrouver l'apicultrice.
+Le pseudonyme reste une donnée personnelle (RGPD) : celui qui a la clé peut retrouver l'apicultrice.
 
-Toutes les requêtes des labs 6 et 7, avec leur résultat en commentaire, sont à la fin de `formation.sql`
-(lab 6), `volume.sql` (7.1) et `denormalisation.sql` (7.2 et 7.3).
+
+## Étape 7.4 · Le journal d'audit, une copie voulue
+
+Table `journal_audit` (acteur, table_cible, operation, ligne_id, avant, apres), fermée à PUBLIC, ajoutée à la fin
+de `denormalisation.sql`, qui se relance sans erreur.
+
+![VOL 7.4](../images/normalisation/journal7-4.png)
+
+1. **Pourquoi `ligne_id` n'est pas une clé étrangère vers la récolte ?** Si la récolte était supprimée, la clé étrangère bloquerait la suppression (ou effacerait le journal). Le journal doit garder la trace d'une ligne même après sa suppression.
+2. **`avant` et `apres` recopient des lignes entières : acceptable ?** Oui, c'est une copie voulue : le journal doit garder l'état exact de la ligne à ce moment-là, même si elle change ensuite. Le prix est un peu de place en plus.
+3. **Pourquoi `clock_timestamp()` et pas `now()` ?** Dans une transaction, `now()` donne toujours l'heure du début ; 
+`clock_timestamp()` donne l'heure réelle de chaque écriture.
