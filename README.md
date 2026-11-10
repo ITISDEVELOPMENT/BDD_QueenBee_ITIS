@@ -76,6 +76,7 @@ Le résultat attendu est en commentaire sous chaque requête. Ceux qui doivent �
   le jeton donné.
 - `recherche_vuln.py` et `recherche.py` : lab 10.1, l'injection par le tri, puis la version corrigée (liste
   blanche et `sql.Identifier`).
+- `grille.sql` : lab 10.3, la grille de contrôle de la base (C1 à C7 et C10), lancée en `postgres` sans `ON_ERROR_STOP`.
 
 ## Sauvegarde
 

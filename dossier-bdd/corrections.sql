@@ -17,8 +17,9 @@ ALTER VIEW v_mes_recoltes SET (security_barrier = true);
 ALTER VIEW v_ruches_site SET (security_barrier = true);
 ALTER VIEW v_recoltes_site SET (security_barrier = true);
 
--- Plus de fonction temporaire (pg_temp) pour personne
-REVOKE TEMPORARY ON DATABASE queenbee FROM PUBLIC;
+-- Plus de fonction temporaire (pg_temp) pour personne, sur la base courante
+SELECT current_database() AS base \gset
+REVOKE TEMPORARY ON DATABASE :"base" FROM PUBLIC;
 
 -- Tests du 10.2
 SET ROLE "f.ba";
@@ -32,5 +33,5 @@ WHERE relkind = 'v' AND relname IN ('v_moi', 'v_mes_ruches', 'v_mes_mesures', 'v
 ORDER BY relname;
 -- Résultat : security_barrier=true sur les 7 vues filtrantes
 
-SELECT has_database_privilege('qb_apicultrice', 'queenbee', 'TEMPORARY') AS apicultrice_peut_creer_pg_temp;
+SELECT has_database_privilege('qb_apicultrice', current_database(), 'TEMPORARY') AS apicultrice_peut_creer_pg_temp;
 -- Résultat : f

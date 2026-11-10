@@ -30,12 +30,13 @@ CREATE ROLE "coord.sn" LOGIN PASSWORD 'Ruche-coord-2027' IN ROLE qb_coordinateur
 CREATE ROLE "gest.beeafrica" LOGIN PASSWORD 'Ruche-gest-2027' IN ROLE qb_gestionnaire;
 CREATE ROLE "admin.beeafrica" LOGIN PASSWORD 'Ruche-admin-2027' IN ROLE qb_admin;
 
--- 2. Tout fermer, puis ouvrir le minimum
-REVOKE CONNECT ON DATABASE queenbee FROM PUBLIC;
+-- 2. Tout fermer, puis ouvrir le minimum (sur la base courante, quel que soit son nom)
+SELECT current_database() AS base \gset
+REVOKE CONNECT ON DATABASE :"base" FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC;
-GRANT CONNECT ON DATABASE queenbee TO qb_apicultrice, qb_coordinateur, qb_gestionnaire, qb_admin;
+GRANT CONNECT ON DATABASE :"base" TO qb_apicultrice, qb_coordinateur, qb_gestionnaire, qb_admin;
 GRANT USAGE ON SCHEMA public TO qb_apicultrice, qb_coordinateur, qb_gestionnaire, qb_admin;
 GRANT EXECUTE ON FUNCTION qui() TO qb_apicultrice, qb_coordinateur, qb_gestionnaire, qb_admin;
 

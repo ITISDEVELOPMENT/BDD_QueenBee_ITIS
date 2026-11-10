@@ -2,8 +2,10 @@
 
 ## Synthèse
 
-Contrôles passés : ___ / 12  
-Constats : ___ critique(s), ___ haute(s), ___ moyenne(s), ___ basse(s)
+Contrôles passés : 8 / 12 au premier passage, 10 / 12 après corrections (C3 et C12 corrigés ; C9 et C11 restent
+ouverts et sont discutés plus bas)  
+Constats de la grille : 0 critique, 0 haute, 2 moyennes (R1, R3), 2 basses (R2, R4)  
+Failles démontrées : 3 (P1 à P3), toutes corrigées et retestées
 
 ## Étape 10.1 · L'injection par le tri
 
@@ -92,35 +94,44 @@ Puis dans une nouvelle session :
 
 ## Étape 10.3 · La grille de contrôle
 
+Les requêtes C1 à C7 et C10, avec leur résultat en commentaire, sont dans `grille.sql` (lancé en `postgres`, sans
+`ON_ERROR_STOP` : C4, C5 et C7 contiennent des refus attendus).
+
 | N° | Contrôle | Résultat | Constat ouvert ? |
 |----|----------|----------|------------------|
-| C1 | aucune fonction exécutable par PUBLIC | à lancer (requête C1) | ___ |
-| C2 | toute fonction SECURITY DEFINER fixe son `search_path` | OK dans les fichiers (`audit_ligne`, `valider_recolte`) ; à confirmer avec la requête C2 | non |
-| C3 | les vues filtrantes sont des barrières | échec probable : aucun `security_barrier` dans `roles.sql` ; à confirmer avec la requête C3 | oui (R1) |
-| C4 | aucune vue ne montre des données hors périmètre | ___ | ___ |
-| C5 | le journal est en ajout seul | ___ | ___ |
-| C6 | le journal nomme le vrai acteur | ___ | ___ |
-| C7 | une apicultrice n'écrit pas chez une autre | ___ | ___ |
-| C8 | un jeton ne sert qu'une fois | ___ | ___ |
-| C9 | pas de requête construite par `+` ou f" | `query_vuln.py` concatène (version volontairement vulnérable du jour 1) ; `query.py` est sûr | non si `query_vuln.py` reste hors rendu, sinon oui (R2) |
-| C10 | les preuves ne partent pas en cascade | ___ | ___ |
-| C11 | pas de mot de passe dans le dépôt | échec : 5 mots de passe en clair dans `roles.sql` (`git grep -i password`) | oui (R3), à discuter |
-| C12 | la base se reconstruit avec vos fichiers | ___ | ___ |
+| C1 | aucune fonction exécutable par PUBLIC | 0 ligne | non |
+| C2 | toute fonction SECURITY DEFINER fixe son `search_path` | `audit_ligne` et `valider_recolte` : `search_path=public, pg_temp` | non |
+| C3 | les vues filtrantes sont des barrières | au premier passage, aucune vue n'avait `security_barrier` ; après `corrections.sql`, les 7 vues filtrantes l'ont. `v_export_bailleur` n'en a pas : elle ne filtre pas par utilisateur et n'est donnée qu'au gestionnaire | R1, corrigé |
+| C4 | aucune vue ne montre des données hors périmètre | en `f.ba` : son compte, sa ruche SN-CASA-032 et ses 4368 mesures, ses récoltes, une seule ruche sur la carte ; `v_ruches_site` refusée | non |
+| C5 | le journal est en ajout seul | `UPDATE`, `DELETE`, `TRUNCATE` : trois refus, 16 lignes avant et après | non |
+| C6 | le journal nomme le vrai acteur | déclaration en `SET ROLE "f.ba"` : le journal note `f.ba \| INSERT` | non |
+| C7 | une apicultrice n'écrit pas chez une autre | récolte sur SN-KOLD-011 en `f.ba` : viole la contrainte de vérification de la vue | non |
+| C8 | un jeton ne sert qu'une fois | `python3 course_jeton.py RT-f.ba-16` (programme vulnérable) : 1 session, l'autre requête reçoit une erreur de clé dupliquée | non |
+| C9 | pas de requête construite par `+` ou f" | `query_vuln.py` et `recherche_vuln.py` concatènent, volontairement : ce sont les démonstrations du jour 1 et du 10.1 | R2 |
+| C10 | les preuves ne partent pas en cascade | CASCADE seulement sur `adhesion` ; RESTRICT sur `mesure`, `inspection`, `recolte`, `alerte` | non |
+| C11 | pas de mot de passe dans le dépôt | `git grep -i password` : 5 mots de passe en clair dans `roles.sql` | R3, à discuter |
+| C12 | la base se reconstruit avec vos fichiers | tous les fichiers relancés dans une base vide : seulement les refus attendus des tests et les rôles qui existent déjà. Mais `roles.sql` et `corrections.sql` écrivaient `queenbee` en dur | R4, corrigé |
 
-<!-- IMG : C1 à C3 -->
-<!-- ![C1-C3](../images/grille-c1-c3.png) -->
+![C1-C3](../images/revue/grille-c1-c3.png)
 
-<!-- IMG : C4 à C7 -->
-<!-- ![C4-C7](../images/grille-c4-c7.png) -->
+![C4-C7](../images/revue/grille-c4-c7.png)
 
-<!-- IMG : C8 à C12 -->
-<!-- ![C8-C12](../images/grille-c8-c12.png) -->
+C7, lancé juste après (le `\gset` range l'identifiant de SN-KOLD-011 sans rien afficher) :
+
+```
+queenbee=# SELECT id AS ruche_autre FROM ruche WHERE code = 'SN-KOLD-011' \gset
+queenbee=# SET ROLE "f.ba";
+queenbee=> INSERT INTO v_mes_recoltes (ruche_id, date_recolte, quantite_kg) VALUES (:'ruche_autre', '2026-11-10', 1);
+ERREUR:  la nouvelle ligne viole la contrainte de vérification pour la vue « v_mes_recoltes »
+```
+
+![C8-C12](../images/revue/grille-c8-c12.png)
 
 ## Constats de la grille
 
 | ID | Contrôle | Gravité | Constat | Preuve (commande et résultat) | Correction | Retest |
 |----|----------|---------|---------|-------------------------------|------------|--------|
-| R1 | C3 | moyenne | les vues filtrantes (`v_moi`, `v_mes_ruches`, `v_mes_mesures`, `v_mes_recoltes`, `v_ruches_site`, `v_recoltes_site`) n'ont pas `security_barrier` : une fonction piégée peut lire des lignes avant le filtre | requête C3 : `reloptions` vide | `ALTER VIEW … SET (security_barrier = true);` | rejouer la requête C3 |
-| R2 | C9 | basse | `query_vuln.py` construit sa requête par `+` | `grep -n '+ ' query_vuln.py` | garder ce fichier comme démonstration, ne pas l'utiliser en production | _à compléter_ |
-| R3 | C11 | moyenne | mots de passe en clair dans `roles.sql` (versionné dans git) | `git grep -i password` : 5 lignes | mots de passe tirés au hasard hors dépôt (variable d'environnement), à changer | _à compléter_ |
-
+| R1 | C3 | moyenne | les vues filtrantes n'avaient pas `security_barrier` : une fonction piégée lisait les lignes avant le filtre | requête C3 : `reloptions` vide ; l'espion du 10.2 voit les 11 ruches | `security_barrier = true` sur les 7 vues filtrantes (`corrections.sql`) | requête C3 : `security_barrier=true` partout ; l'espion ne voit plus que SN-CASA-032 |
+| R2 | C9 | basse | `query_vuln.py` et `recherche_vuln.py` construisent leur requête par `+` | `grep -n '" *+' *.py` : 2 lignes | gardés comme démonstrations, jamais utilisés en production ; les versions sûres sont `query.py` et `recherche.py` | `query.py` et `recherche.py` n'ont aucune concaténation |
+| R3 | C11 | moyenne | 5 mots de passe en clair dans `roles.sql`, versionné dans un dépôt public | `git grep -i password` : 5 lignes | créer les rôles sans mot de passe dans le fichier et les définir hors dépôt (`\password "f.ba"` dans psql), puis changer les 5 mots de passe, puisqu'ils restent dans l'historique git | à discuter : ce sont des comptes de démonstration, la correction n'est pas appliquée |
+| R4 | C12 | basse | `roles.sql` et `corrections.sql` écrivaient `queenbee` en dur : reconstruits dans une autre base, ils modifiaient les droits de `queenbee` | `grep -n queenbee roles.sql corrections.sql` : 3 lignes | `SELECT current_database() AS base \gset`, puis `:"base"` | reconstruction dans `queenbee_verif` : ses droits sont posés, ceux de `queenbee` ne bougent pas |
