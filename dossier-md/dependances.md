@@ -1,4 +1,4 @@
-# Dépendances fonctionnelles – Groupe ___
+# Dépendances fonctionnelles – Groupe Loïc, Alice et Victor
 
 La table de travail est `extrait_plat` (528 lignes, 10 colonnes) : `ruche_code`, `site_id`, `site_nom`, `pays`,
 `apicultrice`, `telephone`, `cooperative`, `horodatage`, `poids_kg`, `temp_int_c`.

@@ -1,4 +1,4 @@
-# Normalisation de extrait_plat – Groupe ___
+# Normalisation de extrait_plat – Groupe Loïc, Alice et Victor
 
 Clé candidate : **{ruche_code, horodatage}** (lab 4).
 
