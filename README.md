@@ -25,13 +25,16 @@ psql -h localhost -U postgres -d queenbee -f formation.sql
 psql -h localhost -U postgres -d queenbee -v ON_ERROR_STOP=1 -f volume.sql -f denormalisation.sql -f references.sql
 psql -h localhost -U postgres -d queenbee -f check.sql
 psql -h localhost -U postgres -d queenbee -f audit.sql
+psql -h localhost -U postgres -d queenbee -f roles.sql
 ```
 
 `formation.sql`, `check.sql` et `audit.sql` se lancent sans `ON_ERROR_STOP` : leurs tests, à la fin du fichier,
-contiennent des commandes qui doivent être refusées.
+contiennent des commandes qui doivent être refusées. `roles.sql` aussi : les rôles sont communs à tout le serveur,
+donc si la base est reconstruite, ses `CREATE ROLE` répondent « existe déjà » et le reste du fichier passe.
 
 L'ordre compte : `denormalisation.sql` recrée `journal_audit` (`DROP TABLE ... CASCADE`). Si on le relance après
-`audit.sql`, le journal est vidé et perd ses triggers de protection : il faut alors relancer `audit.sql`.
+`audit.sql`, le journal est vidé et perd ses triggers de protection, et les droits donnés par `roles.sql` sur les
+vues du lab 7 disparaissent : il faut alors relancer `audit.sql` puis `roles.sql`.
 
 | Fichier | Contenu |
 |---|---|
@@ -43,6 +46,7 @@ L'ordre compte : `denormalisation.sql` recrée `journal_audit` (`DROP TABLE ... 
 | `references.sql` | 8.1 : `ON DELETE CASCADE` sur les adhésions, `RESTRICT` sur les preuves |
 | `check.sql` | 8.2 : contraintes `CHECK` sur les mesures, rôles et statuts |
 | `audit.sql` | 8.3 : trigger d'audit sur `recolte` et `utilisateur`, journal en ajout seul |
+| `roles.sql` | 8.4 : logins uniques, 4 groupes et 5 comptes, fermeture à `PUBLIC`, vues de moindre privilège et droits |
 
 Tous les fichiers se relancent, sauf `volume.sql` : la contrainte anti-rejeu de `mesure` refuse les doublons.
 `audit.sql` ajoute une ligne au journal à chaque lancement (son test modifie une récolte), ce qui est voulu : le
@@ -58,4 +62,4 @@ Le résultat attendu est en commentaire sous chaque requête. Ceux qui doivent �
 - `plat.sql`, `contraintes.sql` : jour 1, lab 4
 - `anomalies.sql`, `migration_3nf.sql`, `preuve.sql` : jour 1, lab 5
 - jour 2 : à la fin de chaque fichier (`formation.sql`, `volume.sql`, `denormalisation.sql`, `references.sql`,
-  `check.sql`, `audit.sql`)
+  `check.sql`, `audit.sql`, `roles.sql`)
