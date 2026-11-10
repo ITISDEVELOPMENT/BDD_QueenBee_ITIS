@@ -41,22 +41,52 @@ avec `sql.Identifier`, et n'affiche plus l'erreur de la base. L'attaque par erre
 
 ## Étape 10.2 · La vue qui en dit trop
 
-<!-- IMG : f.ba lit apicultrice (refusé) puis v_carte_ruches (11 ruches, tous les téléphones) -->
-<!-- ![Vue trop large 10.2](../images/vue-large10-2.png) -->
+**La vue trop large** : un collègue pressé ajoute `v_carte_ruches` (code, position, nom et téléphone de toutes les
+ruches) et la donne à `qb_apicultrice`. En `f.ba`, la table `apicultrice` est refusée, mais la vue s'exécute avec
+les droits de son propriétaire : elle montre les 11 ruches et les 8 téléphones. C'est une élévation de privilège.
 
-<!-- IMG : fonction espion sur v_mes_ruches (NOTICE avec les positions GPS) -->
-<!-- ![Espion 10.2](../images/espion10-2.png) -->
+![Vue trop large 10.2](../images/revue/vue-large10-2.png)
 
-<!-- IMG : retest après corrections.sql -->
-<!-- ![Retest 10.2](../images/retest10-2.png) -->
+**La fonction espion** : toujours en `f.ba`, une fonction temporaire `pg_temp.espion(code, latitude, longitude)` qui
+affiche ce qu'elle reçoit, placée dans le `WHERE` sur `v_mes_ruches`. Le résultat ne montre que SN-CASA-032 (la
+SN-CASA-013 de l'énoncé n'existe pas chez nous), mais les `NOTICE` donnent la position GPS des 11 ruches : PostgreSQL
+a évalué la fonction avant le filtre de la vue. Pour un voleur, c'est la carte complète.
+
+![Espion 10.2](../images/revue/espion10-2.png)
+
+**Les corrections** (`corrections.sql`, lancé en `postgres`) : la vue réécrite (ses ruches seulement, sans nom ni
+téléphone), `security_barrier` sur les 7 vues filtrantes, et `REVOKE TEMPORARY ON DATABASE queenbee FROM PUBLIC`.
+Retest dans la même session : la vue ne montre plus qu'une ligne sans téléphone, et l'espion ne voit plus que
+SN-CASA-032. Dans une nouvelle session : `droit refusé pour la création de tables temporaires`.
+
+Retest dans la même session `f.ba`, juste après `corrections.sql` :
+
+```
+queenbee=> SELECT * FROM v_carte_ruches;
+    code     | latitude | longitude
+-------------+----------+-----------
+ SN-CASA-032 | 12.54320 | -16.28010
+(1 ligne)
+
+queenbee=> SELECT code FROM v_mes_ruches WHERE pg_temp.espion(code, latitude, longitude);
+NOTICE:  espion : SN-CASA-032 12.54320 -16.28010
+    code
+-------------
+ SN-CASA-032
+(1 ligne)
+```
+
+Puis dans une nouvelle session :
+
+![Retest 10.2](../images/revue/retest10-2.png)
 
 ## Failles démontrées (étapes 10.1 et 10.2)
 
 | ID | Faille | Preuve | Correction | Retest |
 |----|--------|--------|------------|--------|
 | P1 | injection par le tri | `recherche_vuln.py` : le téléphone d'Awa Diop dans le message d'erreur, et l'ordre des lignes qui répond oui/non | `recherche.py` : liste blanche, `sql.Identifier`, erreur de la base masquée | « Tri refusé : choisissez code ou date_installation » |
-| P2 | vue `v_carte_ruches` trop large | ___ | ___ | ___ |
-| P3 | fuite par fonction espion | ___ | ___ | ___ |
+| P2 | vue `v_carte_ruches` trop large | en `f.ba`, `apicultrice` refusée mais la vue montre 11 ruches et 8 téléphones | vue réécrite : ses ruches seulement, sans nom ni téléphone, `security_barrier` | une seule ligne (SN-CASA-032), sans téléphone |
+| P3 | fuite par fonction espion | `pg_temp.espion` sur `v_mes_ruches` : 1 ligne affichée, 11 positions GPS dans les `NOTICE` | `security_barrier` sur les 7 vues filtrantes, `REVOKE TEMPORARY ... FROM PUBLIC` | l'espion ne voit plus que SN-CASA-032 ; nouvelle session : droit refusé pour les tables temporaires |
 
 
 

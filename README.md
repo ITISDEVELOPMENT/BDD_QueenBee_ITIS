@@ -13,6 +13,7 @@ en Côte d'Ivoire et au Cameroun), réalisée en TP de base de données.
   - `normalisation_j2.md` : jour 2, labs 6 et 7
   - `matrice_droits.md` : jour 2, lab 8 (droits et limites du journal)
   - `concurrence.md` et `durabilite.md` : jour 2, lab 9 (transactions, course au jeton, sauvegarde)
+  - `rapport_revue.md` : jour 2, lab 10 (revue de sécurité)
 - `images/` : les captures d'écran citées dans les `.md`
 
 ## Construire la base
@@ -27,7 +28,7 @@ psql -h localhost -U postgres -d queenbee -v ON_ERROR_STOP=1 -f volume.sql -f de
 psql -h localhost -U postgres -d queenbee -f check.sql
 psql -h localhost -U postgres -d queenbee -f audit.sql
 psql -h localhost -U postgres -d queenbee -f roles.sql
-psql -h localhost -U postgres -d queenbee -v ON_ERROR_STOP=1 -f jeton.sql
+psql -h localhost -U postgres -d queenbee -v ON_ERROR_STOP=1 -f jeton.sql -f corrections.sql
 ```
 
 `formation.sql`, `check.sql` et `audit.sql` se lancent sans `ON_ERROR_STOP` : leurs tests, à la fin du fichier,
@@ -36,7 +37,8 @@ donc si la base est reconstruite, ses `CREATE ROLE` répondent « existe déjà 
 
 L'ordre compte : `denormalisation.sql` recrée `journal_audit` (`DROP TABLE ... CASCADE`). Si on le relance après
 `audit.sql`, le journal est vidé et perd ses triggers de protection, et les droits donnés par `roles.sql` sur les
-vues du lab 7 disparaissent : il faut alors relancer `audit.sql` puis `roles.sql`.
+vues du lab 7 disparaissent : il faut alors relancer `audit.sql` puis `roles.sql`. De même, `roles.sql` recrée les
+vues et efface leur `security_barrier` : après lui, il faut toujours relancer `corrections.sql`.
 
 | Fichier | Contenu |
 |---|---|
@@ -50,6 +52,7 @@ vues du lab 7 disparaissent : il faut alors relancer `audit.sql` puis `roles.sql
 | `audit.sql` | 8.3 : trigger d'audit sur `recolte` et `utilisateur`, journal en ajout seul |
 | `roles.sql` | 8.4 et 8.5 : logins uniques, 4 groupes et 5 comptes, fermeture à `PUBLIC`, vues de moindre privilège, droits et `valider_recolte` |
 | `jeton.sql` | 9.2 à 9.4 : tables `jeton` et `session_app`, 30 jetons pour f.ba, contrainte `UNIQUE (jeton_id)` |
+| `corrections.sql` | 10.2 : vue de carte réécrite, `security_barrier` sur les vues filtrantes, `REVOKE TEMPORARY` |
 
 Tous les fichiers se relancent, sauf `volume.sql` : la contrainte anti-rejeu de `mesure` refuse les doublons.
 `audit.sql` ajoute une ligne au journal à chaque lancement (son test modifie une récolte), ce qui est voulu : le
@@ -71,6 +74,8 @@ Le résultat attendu est en commentaire sous chaque requête. Ceux qui doivent �
 - `course_jeton.py` et `course_jeton_corrige.py` : lab 9.3, deux requêtes simultanées avec le même jeton
   (`python3 course_jeton.py RT-f.ba-10`, avec `PGUSER`, `PGPASSWORD` et `PGHOST` définis). Chaque lancement consomme
   le jeton donné.
+- `recherche_vuln.py` et `recherche.py` : lab 10.1, l'injection par le tri, puis la version corrigée (liste
+  blanche et `sql.Identifier`).
 
 ## Sauvegarde
 

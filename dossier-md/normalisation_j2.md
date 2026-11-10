@@ -68,7 +68,7 @@ Après le découpage, plus aucune table ne contient à la fois l'apicultrice et 
 (Fatou Ba dans l'énoncé) chez Ibrahima Fall (varroa) alors qu'elle a déjà Moussa Sarr.
 Résultat : `Awa Diop | varroa | {"Ibrahima Fall","Moussa Sarr"}`.
 
-![INSERT 6.3](../images/regle-perdu6-3.png)
+![INSERT 6.3](../images/normalisation/regle-perdu6-3.png)
 
 ### Le trigger
 
