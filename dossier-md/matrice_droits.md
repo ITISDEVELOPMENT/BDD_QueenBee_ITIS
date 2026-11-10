@@ -88,8 +88,8 @@ Tous les tests donnent le résultat attendu. Le journal lu par l'admin nomme les
 et `coord.sn | recolte | UPDATE`, même quand la validation passe par une fonction `SECURITY DEFINER`. Les tests ont été
 lancés deux fois, d'où deux paires de lignes : le journal garde tout.
 
-![Tests 8.6 (1)](../images/matrice/contournement8-6-a.png)
+![TESTS 8.6 (1)](../images/matrice/contournement8-6-a.png)
 
-![Tests 8.6 (2)](../images/matrice/contournement8-6-b.png)
+![TESTS 8.6 (2)](../images/matrice/contournement8-6-b.png)
 
-![Tests 8.6 (3)](../images/matrice/contournement8-6-c.png)
+![TESTS 8.6 (3)](../images/matrice/contournement8-6-c.png)
