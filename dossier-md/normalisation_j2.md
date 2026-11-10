@@ -31,3 +31,26 @@ La table accepte la modification sans erreur : Moussa Sarr enseigne deux thèmes
 `formateur -> theme` est violée.
 
 ![Anomalie 6.1](../images/anomalie6-1.png)
+
+
+## Étape 6.2 · Découper, et prouver qu'on n'a rien perdu
+
+### Le mauvais découpage
+
+On découpe en `p1 (telephone, theme)` et `p2 (theme, formateur)`. La colonne commune `theme` n'est la clé
+d'aucun des deux morceaux : un thème a plusieurs formateurs. La jointure donne 16 lignes au lieu de 8, dont
+8 inventées. Par exemple, Fatou Ba (`+221 77 100 00 02`) serait suivie par trois formateurs varroa.
+
+![Tbl_Temp 6.2](../images/table-temp6-2.png)
+
+### Le bon découpage (BCNF)
+
+- `formateur (id, nom UNIQUE, theme)` : la contrainte `UNIQUE` sur `nom` garantit `formateur -> theme`
+  (un nom = une seule ligne = un seul thème). Le `CHECK` limite `theme` à varroa, recolte, capteurs.
+- `suivi_formation (apicultrice_id, formateur_id)`, clé primaire sur les deux colonnes.
+
+`suivi_formation` pointe vers `apicultrice(id)` et non vers le téléphone, pour ne pas recopier le téléphone : s'il
+change, on le modifie à un seul endroit (dans `apicultrice`).
+
+Preuve : 5 formateurs, 8 suivis, et la double comparaison `EXCEPT` avec la table d'origine renvoie 0 ligne dans
+les deux sens : rien de perdu, rien d'inventé.
