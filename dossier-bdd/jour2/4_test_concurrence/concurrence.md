@@ -8,7 +8,7 @@ L'application écrit dans `journal_appli` que la récolte de SN-KOLD-011 est val
 l'`UPDATE` sans `validee_par`. La base refuse (`recolte_validation_complete`), mais le journal de l'application
 affirme quand même la validation : il ment.
 
-![Trace 9.1](../images/concurrence/trace9-1.png)
+![Trace 9.1](../../../images/concurrence/trace9-1.png)
 
 ### Avec une transaction
 
@@ -16,7 +16,7 @@ Avant : 16 lignes dans `journal_audit`. Dans la transaction, la validation compl
 écrit sa trace : 17 lignes. Après `SELECT 1 / 0`, la transaction est annulée et toute commande est refusée
 jusqu'au `ROLLBACK`. Après le `ROLLBACK`, on revient à 16 : l'action et sa trace sont annulées ensemble.
 
-![Transaction 9.1](../images/concurrence/transaction9-1.png)
+![Transaction 9.1](../../../images/concurrence/transaction9-1.png)
 
 Nous avons pris SN-KOLD-011 : la SN-CASA-011 de l'énoncé n'existe pas chez nous. La contrainte s'appelle chez nous
 `recolte_validation_complete`, et la date de validation `date_validation`.
@@ -45,7 +45,7 @@ session. Un jeton prévu pour servir une fois a servi deux fois (race condition)
 
 Terminal A à gauche, terminal B à droite :
 
-![Course 9.2](../images/concurrence/Course-9-2.png)
+![Course 9.2](../../../images/concurrence/Course-9-2.png)
 
 ## Étape 9.3 · La course par un programme
 
@@ -56,7 +56,7 @@ La version vulnérable vérifie (`SELECT`), attend, puis agit : les deux requêt
 chacune une session. La version corrigée vérifie et agit dans un seul `UPDATE … WHERE utilise_le IS NULL … RETURNING` :
 la seconde requête attend la fin de la première, puis ne trouve plus de jeton libre.
 
-![Course 9.3](../images/concurrence/course-python_9-3.png)
+![Course 9.3](../../../images/concurrence/course-python_9-3.png)
 
 ## Étape 9.4 · Les quatre corrections
 
@@ -65,14 +65,14 @@ la seconde requête attend la fin de la première, puis ne trouve plus de jeton 
 Le `SELECT` de A verrouille la ligne : B se fige sur son propre `SELECT … FOR UPDATE`. Dès que A fait `COMMIT`, B se
 débloque et voit `utilise_le` rempli. B fait `ROLLBACK`.
 
-![FOR UPDATE 9.4](../images/concurrence/correction1-9-4.png)
+![FOR UPDATE 9.4](../../../images/concurrence/correction1-9-4.png)
 
 ### 2. `UPDATE … WHERE … RETURNING` (RT-f.ba-3)
 
 A reçoit un `id`. B attend, puis PostgreSQL réévalue la condition `utilise_le IS NULL` : elle n'est plus vraie, B
 reçoit 0 ligne.
 
-![RETURNING 9.4](../images/concurrence/correction2-9-4.png)
+![RETURNING 9.4](../../../images/concurrence/correction2-9-4.png)
 
 ### 3. `UNIQUE (jeton_id)` (RT-f.ba-15)
 
@@ -80,14 +80,14 @@ La contrainte est d'abord refusée : nos courses précédentes ont laissé des d
 session de chaque jeton, puis on la pose. Le programme vulnérable, relancé, n'ouvre plus qu'une session : l'autre
 requête reçoit une erreur de clé dupliquée. La contrainte est ajoutée à la fin de `jeton.sql`.
 
-![UNIQUE 9.4](../images/concurrence/correction3-9-4.png)
+![UNIQUE 9.4](../../../images/concurrence/correction3-9-4.png)
 
 ### 4. `REPEATABLE READ` (RT-f.ba-4)
 
 Les deux voient le jeton libre, mais l'`UPDATE` de B attend celui de A. Quand A valide, B échoue avec « n'a pas pu
 sérialiser un accès à cause d'une mise à jour en parallèle » au lieu d'agir. B fait `ROLLBACK`.
 
-![REPEATABLE READ 9.4](../images/concurrence/correction4-9-4.png)
+![REPEATABLE READ 9.4](../../../images/concurrence/correction4-9-4.png)
 
 ### Comparaison
 

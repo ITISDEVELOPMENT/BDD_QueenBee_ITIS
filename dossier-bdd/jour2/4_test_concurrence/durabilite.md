@@ -4,12 +4,12 @@
 
 Réglages : `fsync = on`, `synchronous_commit = on`, `wal_level = replica`.
 
-![Réglages 9.5](../images/durabilite/reglages9-5.png)
+![Réglages 9.5](../../../images/durabilite/reglages9-5.png)
 
 Sauvegarde avec `pg_dump`, empreinte SHA-256, restauration dans `queenbee_restore` : le journal restauré a le même
 nombre de lignes (16), le `DELETE` y est toujours refusé, et `sha256sum -c` répond `queenbee_j2.dump: OK`.
 
-![Sauvegarde 9.5](../images/durabilite/sauvegarde9-5.png)
+![Sauvegarde 9.5](../../../images/durabilite/sauvegarde9-5.png)
 
 **Avec `synchronous_commit = off`**, le `COMMIT` répond avant que le journal d'écriture (WAL) soit sur le disque. En
 cas de panne juste après, les dernières transactions validées sont perdues, alors que l'application les croyait

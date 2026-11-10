@@ -10,23 +10,23 @@
 Test : `DELETE FROM ruche WHERE code = 'SN-CASA-099';` est refusé par `mesure_ruche_fk`. 
 Avec `CASCADE` (dans un `BEGIN` / `ROLLBACK`), la même commande efface la ruche et environ 4 368 mesures sans message.
 
-![REFUS 8.1](../images/matrice/reference8-1.png) 
+![REFUS 8.1](../../../images/matrice/reference8-1.png) 
 
-![CASCADE 8.1](../images/matrice/cascade8-1.png) 
+![CASCADE 8.1](../../../images/matrice/cascade8-1.png) 
 
 
 ## Étape 8.2 · Refuser les valeurs impossibles
 
 `check.sql` ajoute six contraintes `CHECK` (batterie, humidité, poids, rôle, statut d'alerte, statut de récolte).
 
-![CHECK 8.1](../images/matrice/check8-2.png) 
+![CHECK 8.1](../../../images/matrice/check8-2.png) 
 
 ## Étape 8.3 · Limite du journal d'audit
 
 Le propriétaire (`postgres`) peut désactiver le trigger du journal (`ALTER TABLE journal_audit DISABLE TRIGGER journal_ajout_seul;`),
 puis le réactiver. C'est pourquoi le journal doit aussi être copié hors de la base (vers le SIEM du cahier des charges).
 
-![AUDIT 8.3](../images/matrice/audit8-3.png)
+![AUDIT 8.3](../../../images/matrice/audit8-3.png)
 
 
 
@@ -53,9 +53,9 @@ Nos logins ont été renommés pour porter le nom du rôle PostgreSQL :
 Les deux Aminata Diop deviennent `aminata.diop.casa` et `aminata.diop.kold` : `login` est maintenant `UNIQUE`.
 
 
-![ROLES 8.4](../images/matrice/roles8-4.png)
+![ROLES 8.4](../../../images/matrice/roles8-4.png)
 
-![DROITS 8.4](../images/matrice/droits8-4.png)
+![DROITS 8.4](../../../images/matrice/droits8-4.png)
 
 
 ## Étape 8.5 · `valider_recolte`
@@ -64,7 +64,7 @@ Le coordinateur ne reçoit pas `UPDATE` sur `recolte` : il pourrait changer les 
 une fonction `SECURITY DEFINER` qui ne valide qu'une récolte `déclarée` d'une ruche de son site,
 et qui est fermée à tous sauf `qb_coordinateur`. Revalider une récolte, ou en valider une d'un autre site, est refusé.
 
-![VALIDATION 8.5](../images/matrice/validation8-5.png)
+![VALIDATION 8.5](../../../images/matrice/validation8-5.png)
 
 
 ## Étape 8.6 · Tests de contournement
@@ -88,8 +88,8 @@ Tous les tests donnent le résultat attendu. Le journal lu par l'admin nomme les
 et `coord.sn | recolte | UPDATE`, même quand la validation passe par une fonction `SECURITY DEFINER`. Les tests ont été
 lancés deux fois, d'où deux paires de lignes : le journal garde tout.
 
-![TESTS 8.6 (1)](../images/matrice/contournement8-6-a.png)
+![TESTS 8.6 (1)](../../../images/matrice/contournement8-6-a.png)
 
-![TESTS 8.6 (2)](../images/matrice/contournement8-6-b.png)
+![TESTS 8.6 (2)](../../../images/matrice/contournement8-6-b.png)
 
-![TESTS 8.6 (3)](../images/matrice/contournement8-6-c.png)
+![TESTS 8.6 (3)](../../../images/matrice/contournement8-6-c.png)

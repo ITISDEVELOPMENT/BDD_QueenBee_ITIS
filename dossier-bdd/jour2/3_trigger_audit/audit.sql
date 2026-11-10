@@ -45,23 +45,4 @@ CREATE TRIGGER journal_sans_truncate
 BEFORE TRUNCATE ON journal_audit
 FOR EACH STATEMENT EXECUTE FUNCTION journal_interdit();
 
--- Tests du 8.3 (lancer sans ON_ERROR_STOP : les trois effacements doivent être refusés)
-UPDATE recolte SET quantite_kg = 45.00
-WHERE ruche_id = (SELECT id FROM ruche WHERE code = 'SN-CASA-014');
-
-SELECT acteur, table_cible, operation,
-       avant ->> 'quantite_kg' AS avant, apres ->> 'quantite_kg' AS apres
-FROM journal_audit;
--- Résultat : postgres | recolte | UPDATE | 42.50 | 45.00 (SN-CASA-014, la SN-CASA-011 de l'énoncé n'existe pas)
-
-UPDATE journal_audit SET acteur = 'personne';
-DELETE FROM journal_audit;
-TRUNCATE journal_audit;
--- Résultat : trois ERREUR « journal_audit est en ajout seul : UPDATE / DELETE / TRUNCATE interdit »
-
-SELECT count(*) FROM journal_audit;
--- Résultat : 1, le nombre de lignes n'a pas bougé
-
-ALTER TABLE journal_audit DISABLE TRIGGER journal_ajout_seul;
-ALTER TABLE journal_audit ENABLE TRIGGER journal_ajout_seul;
--- Résultat : ALTER TABLE deux fois, le propriétaire peut désactiver la protection
+-- Tests du 8.3 : voir tests_audit.sql, dans ce dossier

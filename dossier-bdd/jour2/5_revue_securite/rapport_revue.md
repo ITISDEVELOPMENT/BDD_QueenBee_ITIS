@@ -15,31 +15,31 @@ Le téléphone `+221 77 100 00 02` de l'énoncé (Fatou Ba) est celui d'Awa Diop
 
 **Usage normal** : site `SN-CASA`, tri `code` : les quatre ruches de SN-CASA (014, 021, 032, 099).
 
-![Usage normal 10.1](../images/revue/vuln-normal10-1.png)
+![Usage normal 10.1](../../../images/revue/vuln-normal10-1.png)
 
 **Par erreur** : tri `cast((SELECT telephone FROM apicultrice WHERE nom = 'Awa Diop') AS int)`. La conversion échoue
 et le message d'erreur, affiché tel quel, contient le téléphone : `« +221 77 100 00 02 »`.
 
-![Attaque par erreur 10.1](../images/revue/attaque-erreur10-1.png)
+![Attaque par erreur 10.1](../../../images/revue/attaque-erreur10-1.png)
 
 **À l'aveugle** : tri `CASE WHEN (SELECT substr(telephone, 6, 2) FROM apicultrice WHERE nom = 'Awa Diop') = '77'
 THEN code ELSE longitude::text END`. Avec `'77'`, les ruches sortent triées par code (014, 021, 032, 099) : la réponse
 est oui. Avec `'78'`, elles sortent triées par longitude (021, 014, 099, 032) : la réponse est non. Chiffre par
 chiffre, on reconstitue le numéro sans jamais l'afficher.
 
-![Attaque à l'aveugle 10.1](../images/revue/attaque-aveugle10-1.png)
+![Attaque à l'aveugle 10.1](../../../images/revue/attaque-aveugle10-1.png)
 
 **Empilée** : tri `code; DROP TABLE journal_audit`. Refusée par PostgreSQL : `ne peut pas insérer les commandes
 multiples dans une instruction préparée`. Une requête qui a des paramètres ne peut contenir qu'une seule commande : la
 table `journal_audit` est intacte.
 
-![Attaque empilée 10.1](../images/revue/attaque-empilee10-1.png)
+![Attaque empilée 10.1](../../../images/revue/attaque-empilee10-1.png)
 
 **Version corrigée** : `recherche.py` choisit le tri dans une liste blanche (`code` ou `date_installation`), le passe
 avec `sql.Identifier`, et n'affiche plus l'erreur de la base. L'attaque par erreur donne
 `Tri refusé : choisissez code ou date_installation`.
 
-![Version corrigée 10.1](../images/revue/recherche-corrige10-1.png)
+![Version corrigée 10.1](../../../images/revue/recherche-corrige10-1.png)
 
 ## Étape 10.2 · La vue qui en dit trop
 
@@ -47,14 +47,14 @@ avec `sql.Identifier`, et n'affiche plus l'erreur de la base. L'attaque par erre
 ruches) et la donne à `qb_apicultrice`. En `f.ba`, la table `apicultrice` est refusée, mais la vue s'exécute avec
 les droits de son propriétaire : elle montre les 11 ruches et les 8 téléphones. C'est une élévation de privilège.
 
-![Vue trop large 10.2](../images/revue/vue-large10-2.png)
+![Vue trop large 10.2](../../../images/revue/vue-large10-2.png)
 
 **La fonction espion** : toujours en `f.ba`, une fonction temporaire `pg_temp.espion(code, latitude, longitude)` qui
 affiche ce qu'elle reçoit, placée dans le `WHERE` sur `v_mes_ruches`. Le résultat ne montre que SN-CASA-032 (la
 SN-CASA-013 de l'énoncé n'existe pas chez nous), mais les `NOTICE` donnent la position GPS des 11 ruches : PostgreSQL
 a évalué la fonction avant le filtre de la vue. Pour un voleur, c'est la carte complète.
 
-![Espion 10.2](../images/revue/espion10-2.png)
+![Espion 10.2](../../../images/revue/espion10-2.png)
 
 **Les corrections** (`corrections.sql`, lancé en `postgres`) : la vue réécrite (ses ruches seulement, sans nom ni
 téléphone), `security_barrier` sur les 7 vues filtrantes, et `REVOKE TEMPORARY ON DATABASE queenbee FROM PUBLIC`.
@@ -80,7 +80,7 @@ NOTICE:  espion : SN-CASA-032 12.54320 -16.28010
 
 Puis dans une nouvelle session :
 
-![Retest 10.2](../images/revue/retest10-2.png)
+![Retest 10.2](../../../images/revue/retest10-2.png)
 
 ## Failles démontrées (étapes 10.1 et 10.2)
 
@@ -112,9 +112,9 @@ Les requêtes C1 à C7 et C10, avec leur résultat en commentaire, sont dans `gr
 | C11 | pas de mot de passe dans le dépôt | `git grep -i password` : 5 mots de passe en clair dans `roles.sql` | R3, à discuter |
 | C12 | la base se reconstruit avec vos fichiers | tous les fichiers relancés dans une base vide : seulement les refus attendus des tests et les rôles qui existent déjà. Mais `roles.sql` et `corrections.sql` écrivaient `queenbee` en dur | R4, corrigé |
 
-![C1-C3](../images/revue/grille-c1-c3.png)
+![C1-C3](../../../images/revue/grille-c1-c3.png)
 
-![C4-C7](../images/revue/grille-c4-c7.png)
+![C4-C7](../../../images/revue/grille-c4-c7.png)
 
 C7, lancé juste après (le `\gset` range l'identifiant de SN-KOLD-011 sans rien afficher) :
 
@@ -125,7 +125,7 @@ queenbee=> INSERT INTO v_mes_recoltes (ruche_id, date_recolte, quantite_kg) VALU
 ERREUR:  la nouvelle ligne viole la contrainte de vérification pour la vue « v_mes_recoltes »
 ```
 
-![C8-C12](../images/revue/grille-c8-c12.png)
+![C8-C12](../../../images/revue/grille-c8-c12.png)
 
 ## Constats de la grille
 

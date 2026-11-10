@@ -9,7 +9,7 @@
 
 Les trois tests `GROUP BY … HAVING` renvoient 0 ligne : les données respectent ces règles.
 
-![Tests 6.1](../images/normalisation/tests6-1.png)
+![Tests 6.1](../../../images/normalisation/tests6-1.png)
 
 
 ### Clés candidates
@@ -30,7 +30,7 @@ Dans une transaction annulée (`BEGIN` … `ROLLBACK`), On a passé Moussa Sarr 
 La table accepte la modification sans erreur : Moussa Sarr enseigne deux thèmes, et la règle
 `formateur -> theme` est violée.
 
-![Anomalie 6.1](../images/normalisation/anomalie6-1.png)
+![Anomalie 6.1](../../../images/normalisation/anomalie6-1.png)
 
 
 ## Étape 6.2 · Découper, et prouver qu'on n'a rien perdu
@@ -42,7 +42,7 @@ d'aucun des deux morceaux : un thème a plusieurs formateurs. La jointure donne 
 8 inventées. Par exemple, Awa Diop (`+221 77 100 00 02`, Fatou Ba dans l'énoncé) serait suivie par trois
 formateurs varroa.
 
-![Tbl_Temp 6.2](../images/normalisation/table-temp6-2.png)
+![Tbl_Temp 6.2](../../../images/normalisation/table-temp6-2.png)
 
 ### Le bon découpage (BCNF)
 
@@ -56,7 +56,7 @@ change, on le modifie à un seul endroit (dans `apicultrice`).
 Preuve : 5 formateurs, 8 suivis, et la double comparaison `EXCEPT` avec la table d'origine renvoie 0 ligne dans
 les deux sens : rien de perdu, rien d'inventé.
 
-![Preuve 6.2](../images/normalisation/preuve6-2.png)
+![Preuve 6.2](../../../images/normalisation/preuve6-2.png)
 
 
 
@@ -68,7 +68,7 @@ Après le découpage, plus aucune table ne contient à la fois l'apicultrice et 
 (Fatou Ba dans l'énoncé) chez Ibrahima Fall (varroa) alors qu'elle a déjà Moussa Sarr.
 Résultat : `Awa Diop | varroa | {"Ibrahima Fall","Moussa Sarr"}`.
 
-![INSERT 6.3](../images/normalisation/regle-perdu6-3.png)
+![INSERT 6.3](../../../images/normalisation/regle-perdu6-3.png)
 
 ### Le trigger
 
@@ -77,7 +77,7 @@ Résultat : `Awa Diop | varroa | {"Ibrahima Fall","Moussa Sarr"}`.
 - Chez Ibrahima Fall (varroa) : refusé, `DF violée : cette apicultrice a déjà un formateur pour ce thème`.
 - Chez Khady Ndiaye (récolte, thème nouveau) : accepté, `INSERT 0 1`.
 
-![TRIGGER 6.3](../images/normalisation/trigger6-3.png)
+![TRIGGER 6.3](../../../images/normalisation/trigger6-3.png)
 
 ### Pour aller plus loin : changer le thème d'un formateur
 
@@ -110,7 +110,7 @@ changement si une des apicultrices de ce formateur a déjà un autre formateur p
 | suivi_formation | (apicultrice_id, formateur_id), aucune autre colonne | oui | oui |
 | formation_plat | formateur -> theme | **non** | **non** (3NF seulement, voir 6.1) |
 
-![REVUE 6.4](../images/normalisation/revue6-4.png)
+![REVUE 6.4](../../../images/normalisation/revue6-4.png)
 
 Chaque apicultrice n'a de ruches que sur son site.
 
@@ -155,12 +155,12 @@ autres `apicultrice_id` est vide.
 
 `volume.sql` : 90 jours de mesures par ruche, une toutes les 30 minutes (`INSERT 0 47520`).
 
-![VOLUME 7.1](../images/normalisation/tdb-7-1.png)
+![VOLUME 7.1](../../../images/normalisation/tdb-7-1.png)
 
 Tableau de bord du gestionnaire (UC-G01), site SN-CASA,
 `EXPLAIN ANALYZE` : 192 mesures par jour, Execution Time de 46.396 ms (`Seq Scan on mesure` : toute la table est lue).
 
-![EXPLAIN 7.1](../images/normalisation/explain7-1.png)
+![EXPLAIN 7.1](../../../images/normalisation/explain7-1.png)
 
 
 ## Étape 7.2 · La synthèse, et son prix
@@ -170,14 +170,14 @@ Vue matérialisée `synthese_site_jour`.
 - Temps sur la table `mesure` : 46.396 ms
 - Temps sur la vue : 0.028 ms
 
-![EXPLAIN 7.2](../images/normalisation/explain7-2.png)
+![EXPLAIN 7.2](../../../images/normalisation/explain7-2.png)
 
 ### Le vol (UC-CY04)
 
 Le 15 mars à 6 h, SN-CASA-014 passe à 8,4 kg (la SN-CASA-011 de l'énoncé n'existe pas chez nous). 
 Le 15 mars n'apparaît dans la vue qu'après le `REFRESH`.
 
-![VOL 7.2](../images/normalisation/ajoutvol7-2.png)
+![VOL 7.2](../../../images/normalisation/ajoutvol7-2.png)
 
 Si la vue n'est rafraîchie que la nuit, le vol reste invisible jusqu'au prochain rafraîchissement, soit plusieurs heures (jusqu'à 24 h au pire). Il faut donc détecter un vol dans les mesures brutes.
 
@@ -195,7 +195,7 @@ La vue `v_export_bailleur` utilise un pseudonyme `hmac()` calculé avec une clé
 `cle_pseudonymisation` (fermée à tous). 
 Résultat : 8 lignes pour 11 ruches, et la clé n'apparaît pas dans la définition de la vue (tel que `f`).
 
-![EXPORT 7.3](../images/normalisation/export7-3.png)
+![EXPORT 7.3](../../../images/normalisation/export7-3.png)
 
 ### Colonnes retirées
 
@@ -215,7 +215,7 @@ Le pseudonyme reste une donnée personnelle (RGPD) : celui qui a la clé peut re
 Table `journal_audit` (acteur, table_cible, operation, ligne_id, avant, apres), fermée à PUBLIC, ajoutée à la fin
 de `denormalisation.sql`, qui se relance sans erreur.
 
-![VOL 7.4](../images/normalisation/journal7-4.png)
+![VOL 7.4](../../../images/normalisation/journal7-4.png)
 
 1. **Pourquoi `ligne_id` n'est pas une clé étrangère vers la récolte ?** Si la récolte était supprimée, la clé étrangère bloquerait la suppression (ou effacerait le journal). Le journal doit garder la trace d'une ligne même après sa suppression.
 2. **`avant` et `apres` recopient des lignes entières : acceptable ?** Oui, c'est une copie voulue : le journal doit garder l'état exact de la ligne à ce moment-là, même si elle change ensuite. Le prix est un peu de place en plus.
