@@ -4,4 +4,3 @@ UPDATE formation_plat SET theme = 'capteurs' WHERE telephone = '+221 77 100 00 0
 SELECT formateur, array_agg(DISTINCT theme) FROM formation_plat
 GROUP BY formateur HAVING count(DISTINCT theme) > 1;
 ROLLBACK;
-
