@@ -2,8 +2,6 @@
 import psycopg
 import sys
 
-conn = psycopg.connect(dbname="queenbee")
-
 site = sys.argv[1] if len(sys.argv) > 1 else input("Site : ")
 tri = input("Trier par (code ou date_installation) : ")
 

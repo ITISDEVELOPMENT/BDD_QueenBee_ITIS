@@ -1,4 +1,4 @@
-# Revue de sécurité de notre base – Groupe ___
+# Revue de sécurité de notre base – Groupe Loïc, Alice et Victor
 
 ## Synthèse
 
@@ -7,22 +7,37 @@ Constats : ___ critique(s), ___ haute(s), ___ moyenne(s), ___ basse(s)
 
 ## Étape 10.1 · L'injection par le tri
 
-Test normal : `SN-CASA` puis `code` (les quatre ruches de SN-CASA).
+`recherche_vuln.py` demande un site (paramétré avec `%s`) et un tri, recopié dans la requête (`"ORDER BY " + tri`).
+Le téléphone `+221 77 100 00 02` de l'énoncé (Fatou Ba) est celui d'Awa Diop chez nous : on attaque avec
+`nom = 'Awa Diop'`.
 
-<!-- IMG : recherche_vuln.py, usage normal -->
-<!-- ![Usage normal 10.1](../images/vuln-normal10-1.png) -->
+**Usage normal** : site `SN-CASA`, tri `code` : les quatre ruches de SN-CASA (014, 021, 032, 099).
 
-<!-- IMG : attaque par erreur (le téléphone de Fatou Ba) -->
-<!-- ![Attaque par erreur 10.1](../images/attaque-erreur10-1.png) -->
+![Usage normal 10.1](../images/revue/vuln-normal10-1.png)
 
-<!-- IMG : attaque à l'aveugle ('77' puis '78') -->
-<!-- ![Attaque à l'aveugle 10.1](../images/attaque-aveugle10-1.png) -->
+**Par erreur** : tri `cast((SELECT telephone FROM apicultrice WHERE nom = 'Awa Diop') AS int)`. La conversion échoue
+et le message d'erreur, affiché tel quel, contient le téléphone : `« +221 77 100 00 02 »`.
 
-<!-- IMG : attaque empilée (cannot insert multiple commands…) -->
-<!-- ![Attaque empilée 10.1](../images/attaque-empilee10-1.png) -->
+![Attaque par erreur 10.1](../images/revue/attaque-erreur10-1.png)
 
-<!-- IMG : recherche.py corrigé : Tri refusé -->
-<!-- ![Version corrigée 10.1](../images/recherche-corrigee10-1.png) -->
+**À l'aveugle** : tri `CASE WHEN (SELECT substr(telephone, 6, 2) FROM apicultrice WHERE nom = 'Awa Diop') = '77'
+THEN code ELSE longitude::text END`. Avec `'77'`, les ruches sortent triées par code (014, 021, 032, 099) : la réponse
+est oui. Avec `'78'`, elles sortent triées par longitude (021, 014, 099, 032) : la réponse est non. Chiffre par
+chiffre, on reconstitue le numéro sans jamais l'afficher.
+
+![Attaque à l'aveugle 10.1](../images/revue/attaque-aveugle10-1.png)
+
+**Empilée** : tri `code; DROP TABLE journal_audit`. Refusée par PostgreSQL : `ne peut pas insérer les commandes
+multiples dans une instruction préparée`. Une requête qui a des paramètres ne peut contenir qu'une seule commande : la
+table `journal_audit` est intacte.
+
+![Attaque empilée 10.1](../images/revue/attaque-empilee10-1.png)
+
+**Version corrigée** : `recherche.py` choisit le tri dans une liste blanche (`code` ou `date_installation`), le passe
+avec `sql.Identifier`, et n'affiche plus l'erreur de la base. L'attaque par erreur donne
+`Tri refusé : choisissez code ou date_installation`.
+
+![Version corrigée 10.1](../images/revue/recherche-corrige10-1.png)
 
 ## Étape 10.2 · La vue qui en dit trop
 
@@ -39,7 +54,7 @@ Test normal : `SN-CASA` puis `code` (les quatre ruches de SN-CASA).
 
 | ID | Faille | Preuve | Correction | Retest |
 |----|--------|--------|------------|--------|
-| P1 | injection par le tri | ___ | ___ | ___ |
+| P1 | injection par le tri | `recherche_vuln.py` : le téléphone d'Awa Diop dans le message d'erreur, et l'ordre des lignes qui répond oui/non | `recherche.py` : liste blanche, `sql.Identifier`, erreur de la base masquée | « Tri refusé : choisissez code ou date_installation » |
 | P2 | vue `v_carte_ruches` trop large | ___ | ___ | ___ |
 | P3 | fuite par fonction espion | ___ | ___ | ___ |
 
