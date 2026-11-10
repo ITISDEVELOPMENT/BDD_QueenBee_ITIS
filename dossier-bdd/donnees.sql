@@ -14,14 +14,14 @@ INSERT INTO cooperative (nom, site_id) VALUES
   ('Coopérative Ouest Cameroun',    (SELECT id FROM site WHERE nom = 'Bafoussam'));
 
 INSERT INTO apicultrice (nom, telephone, site_id) VALUES
-  ('Aminata Diop',   '+221 77 100 01 01', (SELECT id FROM site WHERE nom = 'Casamance')),
-  ('Awa Diop',       '+221 77 100 02 02', (SELECT id FROM site WHERE nom = 'Casamance')),
+  ('Aminata Diop',   '+221 77 100 00 01', (SELECT id FROM site WHERE nom = 'Casamance')),
+  ('Awa Diop',       '+221 77 100 00 02', (SELECT id FROM site WHERE nom = 'Casamance')),
   ('Fatou Sow',      '+221 77 100 03 03', (SELECT id FROM site WHERE nom = 'Casamance')),
-  ('Aminata Diop',   '+221 77 200 04 04', (SELECT id FROM site WHERE nom = 'Kolda')),
+  ('Aminata Diop',   '+221 77 200 00 01', (SELECT id FROM site WHERE nom = 'Kolda')),
   ('Mariama Ba',     '+221 77 200 05 05', (SELECT id FROM site WHERE nom = 'Kolda')),
-  ('Adjoua Kone',    '+225 07 300 06 06', (SELECT id FROM site WHERE nom = 'Bouaké')),
-  ('Akissi Traore',  '+225 07 300 07 07', (SELECT id FROM site WHERE nom = 'Bouaké')),
-  ('Nadège Mbarga',  '+237 6 70 40 08 08', (SELECT id FROM site WHERE nom = 'Bafoussam'));
+  ('Adjoua Kone',    '+225 07 100 00 01', (SELECT id FROM site WHERE nom = 'Bouaké')),
+  ('Akissi Traore',  '+225 07 100 00 02', (SELECT id FROM site WHERE nom = 'Bouaké')),
+  ('Nadège Mbarga',  '+237 6 77 100 01', (SELECT id FROM site WHERE nom = 'Bafoussam'));
 
 INSERT INTO adhesion (apicultrice_id, cooperative_id, date_adhesion)
 SELECT a.id, c.id, DATE '2025-01-15' + (row_number() OVER (ORDER BY a.telephone))::int * 10

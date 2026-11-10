@@ -43,12 +43,12 @@ INSERT INTO formateur (nom, theme) VALUES
   
 
 INSERT INTO suivi_formation (apicultrice_id, formateur_id) VALUES
-  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 01 01'), '1'),
-  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 02 02'), '2'),
-  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 03 03'), '3'),
-  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 03 03'), '4'),
-  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 200 05 05'), '5'),
-  ((SELECT id FROM apicultrice WHERE telephone = '+225 07 300 06 06'), '1'),
-  ((SELECT id FROM apicultrice WHERE telephone = '+225 07 300 07 07'), '2'),
-  ((SELECT id FROM apicultrice WHERE telephone = '+237 6 70 40 08 08'), '3')
+  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 00 01'), (SELECT id FROM formateur WHERE nom = 'Moussa Sarr')),
+  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 00 01'), (SELECT id FROM formateur WHERE nom = 'Khady Ndiaye')),
+  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 00 02'), (SELECT id FROM formateur WHERE nom = 'Moussa Sarr')),
+  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 200 00 01'), (SELECT id FROM formateur WHERE nom = 'Ibrahima Fall')),
+  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 200 00 01'), (SELECT id FROM formateur WHERE nom = 'Oumar Diallo')),
+  ((SELECT id FROM apicultrice WHERE telephone = '+225 07 100 00 01'), (SELECT id FROM formateur WHERE nom = 'Kouassi Yao')),
+  ((SELECT id FROM apicultrice WHERE telephone = '+225 07 100 00 02'), (SELECT id FROM formateur WHERE nom = 'Oumar Diallo')),
+  ((SELECT id FROM apicultrice WHERE telephone = '+225 07 100 00 02'), (SELECT id FROM formateur WHERE nom = 'Khady Ndiaye'))
   ;
