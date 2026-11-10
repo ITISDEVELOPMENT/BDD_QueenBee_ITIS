@@ -4,10 +4,10 @@ CREATE TABLE formation_plat (
     telephone  VARCHAR(50) NOT NULL,
     theme VARCHAR(50) NOT NULL,
     formateur  VARCHAR(50) NOT NULL,
-    PRIMARY KEY (telephone, formateur)
+    PRIMARY KEY (telephone, theme)
 );
 
-INSERT INTO formation_plat (telephone, theme, formateur) VALUES(
+INSERT INTO formation_plat (telephone, theme, formateur) VALUES
   ('+221 77 100 00 01', 'varroa', 'Moussa Sarr'),
   ('+221 77 100 00 01', 'recolte', 'Khady Ndiaye'),
   ('+221 77 100 00 02', 'varroa', 'Moussa Sarr'),
@@ -16,4 +16,4 @@ INSERT INTO formation_plat (telephone, theme, formateur) VALUES(
   ('+225 07 100 00 01', 'varroa', 'Kouassi Yao'),
   ('+225 07 100 00 02', 'capteurs', 'Oumar Diallo'),
   ('+237 6 77 100 01', 'recolte', 'Khady Ndiaye')
-);
+;
