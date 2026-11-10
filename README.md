@@ -12,6 +12,7 @@ en Côte d'Ivoire et au Cameroun), réalisée en TP de base de données.
   - `dependances.md` et `normalisation.md` : jour 1, labs 4 et 5
   - `normalisation_j2.md` : jour 2, labs 6 et 7
   - `matrice_droits.md` : jour 2, lab 8 (droits et limites du journal)
+  - `concurrence.md` et `durabilite.md` : jour 2, lab 9 (transactions, course au jeton, sauvegarde)
 - `images/` : les captures d'écran citées dans les `.md`
 
 ## Construire la base
@@ -26,6 +27,7 @@ psql -h localhost -U postgres -d queenbee -v ON_ERROR_STOP=1 -f volume.sql -f de
 psql -h localhost -U postgres -d queenbee -f check.sql
 psql -h localhost -U postgres -d queenbee -f audit.sql
 psql -h localhost -U postgres -d queenbee -f roles.sql
+psql -h localhost -U postgres -d queenbee -v ON_ERROR_STOP=1 -f jeton.sql
 ```
 
 `formation.sql`, `check.sql` et `audit.sql` se lancent sans `ON_ERROR_STOP` : leurs tests, à la fin du fichier,
@@ -46,7 +48,8 @@ vues du lab 7 disparaissent : il faut alors relancer `audit.sql` puis `roles.sql
 | `references.sql` | 8.1 : `ON DELETE CASCADE` sur les adhésions, `RESTRICT` sur les preuves |
 | `check.sql` | 8.2 : contraintes `CHECK` sur les mesures, rôles et statuts |
 | `audit.sql` | 8.3 : trigger d'audit sur `recolte` et `utilisateur`, journal en ajout seul |
-| `roles.sql` | 8.4 : logins uniques, 4 groupes et 5 comptes, fermeture à `PUBLIC`, vues de moindre privilège et droits |
+| `roles.sql` | 8.4 et 8.5 : logins uniques, 4 groupes et 5 comptes, fermeture à `PUBLIC`, vues de moindre privilège, droits et `valider_recolte` |
+| `jeton.sql` | 9.2 à 9.4 : tables `jeton` et `session_app`, 30 jetons pour f.ba, contrainte `UNIQUE (jeton_id)` |
 
 Tous les fichiers se relancent, sauf `volume.sql` : la contrainte anti-rejeu de `mesure` refuse les doublons.
 `audit.sql` ajoute une ligne au journal à chaque lancement (son test modifie une récolte), ce qui est voulu : le
@@ -65,3 +68,12 @@ Le résultat attendu est en commentaire sous chaque requête. Ceux qui doivent �
   `check.sql`, `audit.sql`, `roles.sql`)
 - `tests_contournement.sql` : lab 8.6, les 12 tentatives de contournement (lancé en `postgres`, sans `ON_ERROR_STOP`,
   après `roles.sql`). Il modifie la base exprès : chaque lancement ajoute une récolte validée et deux lignes au journal.
+- `course_jeton.py` et `course_jeton_corrige.py` : lab 9.3, deux requêtes simultanées avec le même jeton
+  (`python3 course_jeton.py RT-f.ba-10`, avec `PGUSER`, `PGPASSWORD` et `PGHOST` définis). Chaque lancement consomme
+  le jeton donné.
+
+## Sauvegarde
+
+`dossier-bdd/queenbee_j2.dump.sha256` est l'empreinte de la sauvegarde du lab 9.5. La sauvegarde elle-même
+(`queenbee_j2.dump`) n'est pas dans le dépôt : elle contient des données personnelles (`*.dump` dans `.gitignore`).
+Pour vérifier une sauvegarde : `sha256sum -c queenbee_j2.dump.sha256`.
