@@ -29,3 +29,5 @@ Dans une transaction annulée (`BEGIN` … `ROLLBACK`), On a passé Moussa Sarr 
 
 La table accepte la modification sans erreur : Moussa Sarr enseigne deux thèmes, et la règle
 `formateur -> theme` est violée.
+
+![Anomalie 6.1](../images/anomalie6-1.png)
