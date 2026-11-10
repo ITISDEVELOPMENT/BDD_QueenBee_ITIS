@@ -33,19 +33,27 @@ puis le réactiver. C'est pourquoi le journal doit aussi être copié hors de la
 
 | Objet | apicultrice | coordinateur | gestionnaire | admin |
 |-------|-------------|--------------|--------------|-------|
-| ses ruches et leurs mesures | lire | ___ | ___ | ___ |
-| déclarer une récolte | sur ses ruches | ___ | ___ | ___ |
-| valider une récolte (UC-C02) | non | ___ | ___ | ___ |
-| ruches et téléphones de son site | ___ | ___ | ___ | ___ |
-| synthèse et export (UC-G01, UC-G02) | ___ | ___ | ___ | ___ |
-| comptes utilisateurs (UC-AD01) | ___ | ___ | ___ | ___ |
-| journal d'audit | ___ | ___ | ___ | lire |
+| ses ruches et leurs mesures | lire (`v_mes_ruches`, `v_mes_mesures`) | non | non | non |
+| déclarer une récolte | sur ses ruches (`v_mes_recoltes`) | non | non | non |
+| valider une récolte (UC-C02) | non | sur son site (`valider_recolte`, 8.5) | non | non |
+| ruches et téléphones de son site | non | lire (`v_ruches_site`, `v_recoltes_site`) | non | non |
+| synthèse et export (UC-G01, UC-G02) | non | non | lire | non |
+| comptes utilisateurs (UC-AD01) | son compte (`v_moi`) | son compte | son compte | lire, créer, modifier (pas supprimer) |
+| journal d'audit | non | non | non | lire |
 
-<!-- IMG : les groupes et les personnes (requête LIKE 'qb\_%', cinq lignes) -->
-<!-- ![Rôles 8.4](../images/roles8-4.png) -->
+Nos logins ont été renommés pour porter le nom du rôle PostgreSQL :
+ `f.ba` = Fatou Sow,
+ `awa.diop` = Awa Diop,
+ `coord.sn` = coordinateur de SN-CASA,
+ `admin.beeafrica` = l'administrateur,
+ `gest.beeafrica` ajouté.
+ 
+Les deux Aminata Diop deviennent `aminata.diop.casa` et `aminata.diop.kold` : `login` est maintenant `UNIQUE`.
 
-<!-- IMG : droits sur les vues (\dp) -->
-<!-- ![Droits 8.4](../images/droits8-4.png) -->
+
+![Rôles 8.4](../images/matrice/roles8-4.png)
+
+![Droits 8.4](../images/matrice/droits8-4.png)
 
 ## Étape 8.5 · `valider_recolte`
 
