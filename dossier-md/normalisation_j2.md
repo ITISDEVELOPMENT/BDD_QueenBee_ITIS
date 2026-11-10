@@ -9,6 +9,9 @@
 
 Les trois tests `GROUP BY … HAVING` renvoient 0 ligne : les données respectent ces règles.
 
+![Tests 6.1](../images/tests6-1.png)
+
+
 ### Clés candidates
 
 - `(telephone, theme)`
