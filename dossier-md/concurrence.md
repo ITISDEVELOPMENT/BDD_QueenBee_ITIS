@@ -60,24 +60,47 @@ la seconde requête attend la fin de la première, puis ne trouve plus de jeton 
 
 ## Étape 9.4 · Les quatre corrections
 
-<!-- IMG : correction 1, FOR UPDATE (RT-f.ba-2) -->
-<!-- ![FOR UPDATE 9.4](../images/correction1-9-4.png) -->
+### 1. `SELECT … FOR UPDATE` (RT-f.ba-2)
 
-<!-- IMG : correction 2, UPDATE … RETURNING (RT-f.ba-3) -->
-<!-- ![RETURNING 9.4](../images/correction2-9-4.png) -->
+Le `SELECT` de A verrouille la ligne : B se fige sur son propre `SELECT … FOR UPDATE`. Dès que A fait `COMMIT`, B se
+débloque et voit `utilise_le` rempli. B fait `ROLLBACK`.
 
-<!-- IMG : correction 3, UNIQUE (refus, nettoyage, puis RT-f.ba-14) -->
-<!-- ![UNIQUE 9.4](../images/correction3-9-4.png) -->
+![FOR UPDATE 9.4](../images/concurrence/correction1-9-4.png)
 
-<!-- IMG : correction 4, REPEATABLE READ (RT-f.ba-4) -->
-<!-- ![REPEATABLE READ 9.4](../images/correction4-9-4.png) -->
+### 2. `UPDATE … WHERE … RETURNING` (RT-f.ba-3)
+
+A reçoit un `id`. B attend, puis PostgreSQL réévalue la condition `utilise_le IS NULL` : elle n'est plus vraie, B
+reçoit 0 ligne.
+
+![RETURNING 9.4](../images/concurrence/correction2-9-4.png)
+
+### 3. `UNIQUE (jeton_id)` (RT-f.ba-15)
+
+La contrainte est d'abord refusée : nos courses précédentes ont laissé des doublons. On garde la plus ancienne
+session de chaque jeton, puis on la pose. Le programme vulnérable, relancé, n'ouvre plus qu'une session : l'autre
+requête reçoit une erreur de clé dupliquée. La contrainte est ajoutée à la fin de `jeton.sql`.
+
+![UNIQUE 9.4](../images/concurrence/correction3-9-4.png)
+
+### 4. `REPEATABLE READ` (RT-f.ba-4)
+
+Les deux voient le jeton libre, mais l'`UPDATE` de B attend celui de A. Quand A valide, B échoue avec « n'a pas pu
+sérialiser un accès à cause d'une mise à jour en parallèle » au lieu d'agir. B fait `ROLLBACK`.
+
+![REPEATABLE READ 9.4](../images/concurrence/correction4-9-4.png)
+
+### Comparaison
 
 | Correction | Où agit-elle ? | Que voit la seconde requête ? | Avantage | Limite |
 |------------|----------------|-------------------------------|----------|--------|
-| `SELECT … FOR UPDATE` | ___ | ___ | ___ | ___ |
-| `UPDATE … WHERE … RETURNING` | ___ | ___ | ___ | ___ |
-| `UNIQUE (jeton_id)` | ___ | ___ | ___ | ___ |
-| `REPEATABLE READ` | ___ | ___ | ___ | ___ |
+| `SELECT … FOR UPDATE` | dans la transaction : un verrou sur la ligne lue | elle attend, puis voit le jeton déjà utilisé | on garde le code en deux étapes | il faut l'écrire dans chaque programme, un oubli suffit |
+| `UPDATE … WHERE … RETURNING` | dans une seule instruction : la condition est dans le `WHERE` | elle attend, puis 0 ligne | vérifier et agir ne font qu'un | ne protège que le code écrit ainsi |
+| `UNIQUE (jeton_id)` | dans la base, quel que soit le programme | une erreur de clé dupliquée | protège même le code vulnérable | l'erreur arrive tard, le programme doit la gérer |
+| `REPEATABLE READ` | le niveau d'isolation de la transaction | une erreur « n'a pas pu sérialiser un accès » | les requêtes ne changent pas | le programme doit annuler et réessayer |
 
-Le trigger du lab 6 est aussi un « vérifier, puis agir ». Deux insertions simultanées peuvent-elles le contourner ?
-Quelle correction le protégerait ? _À compléter._
+### Le trigger du lab 6
+
+Oui. Le trigger vérifie avec un `SELECT` (cette apicultrice a-t-elle déjà un formateur pour ce thème ?), puis laisse
+passer. Deux insertions simultanées ne voient pas la ligne de l'autre, qui n'est pas encore validée : les deux
+passent. Ce qui le protégerait, c'est une contrainte vérifiée par la base elle-même : recopier le thème dans
+`suivi_formation` avec `UNIQUE (apicultrice_id, theme)`, ou passer ces transactions en `SERIALIZABLE`.

@@ -20,3 +20,6 @@ INSERT INTO jeton (utilisateur_id, valeur, expire_le)
 SELECT id, 'RT-f.ba-' || n, now() + INTERVAL '1 day'
 FROM utilisateur CROSS JOIN generate_series(1, 30) AS n
 WHERE login = 'f.ba';
+
+-- 9.4 : un jeton ne peut ouvrir qu'une session, quel que soit le programme
+ALTER TABLE session_app ADD CONSTRAINT session_jeton_unique UNIQUE (jeton_id);
