@@ -1,15 +1,25 @@
-# Concurrence
+# Concurrence et transactions - Groupe Loïc, Alice et Victor
 
 ## Étape 9.1 · L'action et sa trace ensemble
 
-1. `journal_appli` : l'UPDATE est refusé, mais le journal de l'application affirme la validation. _À compléter._
-2. Transaction : +1 ligne dans `journal_audit`, puis `current transaction is aborted` après `SELECT 1 / 0;`, tout revient après `ROLLBACK`.
+### La trace qui ment
 
-<!-- IMG : journal_appli et UPDATE refusé -->
-<!-- ![Journal appli 9.1](../images/journal-appli9-1.png) -->
+L'application écrit dans `journal_appli` que la récolte de SN-KOLD-011 est validée par coord.sn, puis fait
+l'`UPDATE` sans `validee_par`. La base refuse (`recolte_validation_complete`), mais le journal de l'application
+affirme quand même la validation : il ment.
 
-<!-- IMG : comptages avant / dans la transaction / après l'erreur / après ROLLBACK -->
-<!-- ![Transaction 9.1](../images/transaction9-1.png) -->
+![Trace 9.1](../images/concurrence/trace9-1.png)
+
+### Avec une transaction
+
+Avant : 16 lignes dans `journal_audit`. Dans la transaction, la validation complète passe et le trigger d'audit
+écrit sa trace : 17 lignes. Après `SELECT 1 / 0`, la transaction est annulée et toute commande est refusée
+jusqu'au `ROLLBACK`. Après le `ROLLBACK`, on revient à 16 : l'action et sa trace sont annulées ensemble.
+
+![Transaction 9.1](../images/concurrence/transaction9-1.png)
+
+Nous avons pris SN-KOLD-011 : la SN-CASA-011 de l'énoncé n'existe pas chez nous. La contrainte s'appelle chez nous
+`recolte_validation_complete`, et la date de validation `date_validation`.
 
 ## Étape 9.2 · La course au jeton, dans deux terminaux
 
