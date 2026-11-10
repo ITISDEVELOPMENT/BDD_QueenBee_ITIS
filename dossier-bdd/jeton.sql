@@ -1,4 +1,4 @@
--- 9.1
+-- 9.2.1
 CREATE TABLE jeton (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     utilisateur_id uuid NOT NULL CONSTRAINT jeton_utilisateur_fk REFERENCES utilisateur(id),
