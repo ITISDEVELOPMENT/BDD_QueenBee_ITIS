@@ -13,3 +13,19 @@ FROM (
 );
 CREATE UNIQUE INDEX synthese_site_jour_idx ON synthese_site_jour(site_id, jour);
 EXPLAIN ANALYZE;
+
+--7.3
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+CREATE TABLE cle_pseudonymisation (
+  id  int PRIMARY KEY CHECK (id = 1),
+  cle text NOT NULL
+);
+
+INSERT INTO cle_pseudonymisation VALUES (1, encode(gen_random_bytes(32), 'hex'));
+REVOKE ALL ON cle_pseudonymisation FROM PUBLIC;
+ 
+CREATE VIEW v_export_bailleur AS
+SELECT left(encode(hmac(e.id::text, k.cle, 'sha256'), 'hex'), 12) AS bailleur_pseudo
+FROM exploitant e
+CROSS JOIN cle_pseudonymisation k;
