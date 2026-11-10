@@ -21,26 +21,26 @@ INSERT INTO formation_plat (telephone, theme, formateur) VALUES
 
 -- 6.2.1
 CREATE TABLE formateur (
-    id        uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    nom       VARCHAR(50) UNIQUE NOT NULL,
-    theme     VARCHAR(50) NOT NULL CHECK (theme IN ('varroa', 'recolte', 'capteurs')),
-    telephone VARCHAR(50) NOT NULL
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    nom VARCHAR(50) UNIQUE NOT NULL,
+    theme VARCHAR(50) NOT NULL CHECK (theme IN ('varroa', 'recolte', 'capteurs'))
 );
 
 CREATE TABLE suivi_formation (
-    apicultrice_id uuid UNIQUE CONSTRAINT suivi_formation_apicultrice_fk REFERENCES apicultrice(id),
-    formateur_id   uuid UNIQUE CONSTRAINT suivi_formation_formateur_fk REFERENCES formateur(id),
+    apicultrice_id uuid NOT NULL CONSTRAINT suivi_formation_apicultrice_fk REFERENCES apicultrice(id),
+    formateur_id uuid NOT NULL CONSTRAINT suivi_formation_formateur_fk REFERENCES formateur(id),
     PRIMARY KEY (apicultrice_id, formateur_id)
 );
 
 -- 6.2.2
-INSERT INTO formateur (nom, theme, telephone) VALUES
-  ('Moussa Sarr', 'varroa', '+221 77 300 00 01'),
-  ('Khady Ndiaye', 'recolte', '+221 77 300 00 02'),
-  ('Oumar Diallo', 'capteurs', '+221 77 300 00 03'),
-  ('Ibrahima Fall', 'varroa', '+221 77 300 00 04'),
-  ('Kouassi Yao', 'varroa', '+225 07 300 00 01')
+INSERT INTO formateur (nom, theme) VALUES
+  ('Moussa Sarr', 'varroa'),
+  ('Khady Ndiaye', 'recolte'),
+  ('Oumar Diallo', 'capteurs'),
+  ('Ibrahima Fall', 'varroa'),
+  ('Kouassi Yao', 'varroa')
   ;
+  
 
 INSERT INTO suivi_formation (apicultrice_id, formateur_id) VALUES
   ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 01 01'), '1'),
