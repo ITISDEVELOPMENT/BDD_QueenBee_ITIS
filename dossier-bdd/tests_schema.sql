@@ -3,7 +3,7 @@ INSERT INTO ruche (code, site_id, apicultrice_id)
 VALUES ('SN-CASA-T01', 'SN-CASA', gen_random_uuid());
 
 -- Test 2 : supprimer une apicultrice qui a des ruches. Attendu : refus
-DELETE FROM apicultrice WHERE telephone = '+221 77 100 01 01';
+DELETE FROM apicultrice WHERE telephone = '+221 77 100 00 01';
 
 -- Test 3 : une ruche sans apicultrice. Attendu : refus
 INSERT INTO ruche (code, site_id) VALUES ('SN-CASA-T03', 'SN-CASA');

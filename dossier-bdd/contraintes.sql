@@ -34,10 +34,10 @@ ALTER TABLE utilisateur ADD CONSTRAINT utilisateur_login_unique UNIQUE (login);
 -- 3. un login par personne (Awa Diop garde a.diop)
 UPDATE utilisateur u SET login = 'aminata.diop.casa'
 FROM apicultrice a
-WHERE a.id = u.apicultrice_id AND a.nom = 'Aminata Diop' AND a.telephone = '+221 77 100 01 01';
+WHERE a.id = u.apicultrice_id AND a.nom = 'Aminata Diop' AND a.telephone = '+221 77 100 00 01';
 UPDATE utilisateur u SET login = 'aminata.diop.kold'
 FROM apicultrice a
-WHERE a.id = u.apicultrice_id AND a.nom = 'Aminata Diop' AND a.telephone = '+221 77 200 04 04';
+WHERE a.id = u.apicultrice_id AND a.nom = 'Aminata Diop' AND a.telephone = '+221 77 200 00 01';
 
 -- 4. acceptée
 ALTER TABLE utilisateur ADD CONSTRAINT utilisateur_login_unique UNIQUE (login);

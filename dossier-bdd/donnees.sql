@@ -28,17 +28,17 @@ SELECT a.id, c.id, DATE '2025-01-15' + (row_number() OVER (ORDER BY a.telephone)
 FROM apicultrice a JOIN cooperative c ON c.site_id = a.site_id;
 
 INSERT INTO ruche (code, latitude, longitude, date_installation, site_id, apicultrice_id) VALUES
-  ('SN-CASA-014', 12.55000, -16.27000, '2025-02-10', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 100 01 01'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 100 01 01')),
-  ('SN-CASA-099', 12.55210, -16.27340, '2025-03-02', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 100 01 01'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 100 01 01')),
-  ('SN-CASA-021', 12.56010, -16.26120, '2025-03-18', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 100 02 02'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 100 02 02')),
+  ('SN-CASA-014', 12.55000, -16.27000, '2025-02-10', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 100 00 01'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 100 00 01')),
+  ('SN-CASA-099', 12.55210, -16.27340, '2025-03-02', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 100 00 01'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 100 00 01')),
+  ('SN-CASA-021', 12.56010, -16.26120, '2025-03-18', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 100 00 02'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 100 00 02')),
   ('SN-CASA-032', 12.54320, -16.28010, '2025-04-05', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 100 03 03'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 100 03 03')),
-  ('SN-KOLD-011', 12.88330, -14.95000, '2025-02-25', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 200 04 04'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 200 04 04')),
-  ('SN-KOLD-012', 12.88510, -14.95420, '2025-02-25', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 200 04 04'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 200 04 04')),
+  ('SN-KOLD-011', 12.88330, -14.95000, '2025-02-25', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 200 00 01'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 200 00 01')),
+  ('SN-KOLD-012', 12.88510, -14.95420, '2025-02-25', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 200 00 01'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 200 00 01')),
   ('SN-KOLD-020', 12.89010, -14.94010, '2025-05-12', (SELECT site_id FROM apicultrice WHERE telephone = '+221 77 200 05 05'), (SELECT id FROM apicultrice WHERE telephone = '+221 77 200 05 05')),
-  ('CI-BOUA-005',  7.69000,  -5.03000, '2025-04-20', (SELECT site_id FROM apicultrice WHERE telephone = '+225 07 300 06 06'), (SELECT id FROM apicultrice WHERE telephone = '+225 07 300 06 06')),
-  ('CI-BOUA-006',  7.69320,  -5.03510, '2025-04-20', (SELECT site_id FROM apicultrice WHERE telephone = '+225 07 300 07 07'), (SELECT id FROM apicultrice WHERE telephone = '+225 07 300 07 07')),
-  ('CM-BAFO-003',  5.47780,  10.41760, '2025-06-01', (SELECT site_id FROM apicultrice WHERE telephone = '+237 6 70 40 08 08'), (SELECT id FROM apicultrice WHERE telephone = '+237 6 70 40 08 08')),
-  ('CM-BAFO-004',  5.48010,  10.42200, '2025-06-01', (SELECT site_id FROM apicultrice WHERE telephone = '+237 6 70 40 08 08'), (SELECT id FROM apicultrice WHERE telephone = '+237 6 70 40 08 08'));
+  ('CI-BOUA-005',  7.69000,  -5.03000, '2025-04-20', (SELECT site_id FROM apicultrice WHERE telephone = '+225 07 100 00 01'), (SELECT id FROM apicultrice WHERE telephone = '+225 07 100 00 01')),
+  ('CI-BOUA-006',  7.69320,  -5.03510, '2025-04-20', (SELECT site_id FROM apicultrice WHERE telephone = '+225 07 100 00 02'), (SELECT id FROM apicultrice WHERE telephone = '+225 07 100 00 02')),
+  ('CM-BAFO-003',  5.47780,  10.41760, '2025-06-01', (SELECT site_id FROM apicultrice WHERE telephone = '+237 6 77 100 01'), (SELECT id FROM apicultrice WHERE telephone = '+237 6 77 100 01')),
+  ('CM-BAFO-004',  5.48010,  10.42200, '2025-06-01', (SELECT site_id FROM apicultrice WHERE telephone = '+237 6 77 100 01'), (SELECT id FROM apicultrice WHERE telephone = '+237 6 77 100 01'));
 
 -- 48 mesures par ruche (toutes les 30 min sur 24 h)
 INSERT INTO mesure (ruche_id, horodatage, poids_kg, temp_int_c, temp_ext_c, humidite_pct, activite_sonore, batterie_pct)

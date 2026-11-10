@@ -18,7 +18,7 @@ FROM extrait_plat GROUP BY pays ORDER BY pays;          -- 4 pays
 -- 2. Suppression : Awa Diop disparaît (attendu : 0 ligne)
 BEGIN;
 DELETE FROM extrait_plat WHERE apicultrice = 'Awa Diop';
-SELECT count(*) FROM extrait_plat WHERE telephone = '+221 77 100 02 02';
+SELECT count(*) FROM extrait_plat WHERE telephone = '+221 77 100 00 02';
 ROLLBACK;
 
 -- 3. Insertion : un site sans ruche est refusé (ruche_code nul)
@@ -33,5 +33,5 @@ SELECT ruche_code, array_agg(DISTINCT telephone) FROM extrait_plat
 GROUP BY ruche_code HAVING count(DISTINCT telephone) > 1;   -- SN-KOLD-011
 
 UPDATE extrait_plat SET pays = 'Sénégal' WHERE pays = 'Senegal';
-UPDATE extrait_plat SET telephone = '+221 77 200 04 04' WHERE telephone = '+221 77 999 99 99';
+UPDATE extrait_plat SET telephone = '+221 77 200 00 01' WHERE telephone = '+221 77 999 99 99';
 -- puis relancer migration_3nf.sql : 4 sites, 8 apicultrices, 11 ruches, 528 mesures

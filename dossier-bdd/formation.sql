@@ -33,22 +33,11 @@ CREATE TABLE suivi_formation (
 );
 
 -- 6.2.2
-INSERT INTO formateur (nom, theme) VALUES
-  ('Moussa Sarr', 'varroa'),
-  ('Khady Ndiaye', 'recolte'),
-  ('Oumar Diallo', 'capteurs'),
-  ('Ibrahima Fall', 'varroa'),
-  ('Kouassi Yao', 'varroa')
-  ;
-  
+INSERT INTO formateur (nom, theme)
+SELECT DISTINCT formateur, theme FROM formation_plat;
 
-INSERT INTO suivi_formation (apicultrice_id, formateur_id) VALUES
-  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 00 01'), (SELECT id FROM formateur WHERE nom = 'Moussa Sarr')),
-  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 00 01'), (SELECT id FROM formateur WHERE nom = 'Khady Ndiaye')),
-  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 100 00 02'), (SELECT id FROM formateur WHERE nom = 'Moussa Sarr')),
-  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 200 00 01'), (SELECT id FROM formateur WHERE nom = 'Ibrahima Fall')),
-  ((SELECT id FROM apicultrice WHERE telephone = '+221 77 200 00 01'), (SELECT id FROM formateur WHERE nom = 'Oumar Diallo')),
-  ((SELECT id FROM apicultrice WHERE telephone = '+225 07 100 00 01'), (SELECT id FROM formateur WHERE nom = 'Kouassi Yao')),
-  ((SELECT id FROM apicultrice WHERE telephone = '+225 07 100 00 02'), (SELECT id FROM formateur WHERE nom = 'Oumar Diallo')),
-  ((SELECT id FROM apicultrice WHERE telephone = '+225 07 100 00 02'), (SELECT id FROM formateur WHERE nom = 'Khady Ndiaye'))
-  ;
+INSERT INTO suivi_formation (apicultrice_id, formateur_id)
+SELECT a.id, f.id
+FROM formation_plat p
+JOIN apicultrice a ON a.telephone = p.telephone
+JOIN formateur f   ON f.nom = p.formateur;
