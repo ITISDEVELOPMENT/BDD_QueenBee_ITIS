@@ -78,3 +78,75 @@ chez Ibrahima Fall (varroa) alors qu'elle a déjà Moussa Sarr. Résultat : `Fat
 ![TRIGGER 6.3](../images/trigger6-3.png)
 
 
+## Étape 6.4 · Relire tout le schéma
+
+### Revue BCNF
+
+| Table | Dépendances | Partie gauche = super-clé ? | BCNF ? |
+|---|---|---|---|
+| site | id → nom, pays | oui | oui |
+| apicultrice | id → nom, telephone, site_id | oui | oui |
+| cooperative | id → nom, site_id | oui | oui |
+| adhesion | (apicultrice_id, cooperative_id) → date_adhesion | oui | oui |
+| ruche | id → tout ; code → tout ; apicultrice_id → site_id | non pour apicultrice_id | non (voir plus bas) |
+| alerte | id → tout | oui | oui |
+| mesure | id → tout ; (ruche_id, horodatage) → tout | oui | oui |
+| inspection | id → tout | oui | oui |
+| utilisateur | id → tout ; apicultrice_id → tout ; login → tout | oui | oui |
+| recolte | id → tout | oui | oui |
+| formateur | id → tout ; nom → tout | oui | oui |
+| suivi_formation | (apicultrice_id, formateur_id), aucune autre colonne | oui | oui |
+| formation_plat | formateur → theme | **non** | **non** (3NF seulement, voir 6.1) |
+
+![Revue 6.4](../images/revue6-4.png)
+
+Chaque apicultrice n'a de ruches que sur son site.
+
+Le cahier des charges ne le dit pas clairement. Il dit juste qu'une apicultrice est rattachée à un site et
+qu'une ruche appartient à une apicultrice. Pour nous c'est une règle métier : chaque site a son coordinateur,
+et si une apicultrice posait une ruche sur un autre site, son coordinateur ne la verrait plus.
+
+Du coup, `ruche.site_id` recopie le site de l'apicultrice. Dans `ruche`, on a `apicultrice_id -> site_id`,
+et `apicultrice_id` n'est pas une clé de la table : `ruche` n'est donc pas en BCNF. Si quelqu'un change le
+site d'une ruche sans changer celui de l'apicultrice, la base l'accepte sans rien dire.
+
+Aujourd'hui, rien ne garantit cette cohérence dans notre schéma. Les deux `site_id` sont des clés étrangères
+séparées vers `site`. Le test 7 de `tests_schema.sql` permet de voir s'il y a un écart, mais il ne bloque rien.
+
+Pour corriger, on pourrait supprimer `ruche.site_id` et retrouver le site en passant par l'apicultrice. Ou
+alors garder la colonne et ajouter une clé étrangère composée `(apicultrice_id, site_id)` vers
+`apicultrice (id, site_id)`, ce qui oblige la ruche à avoir le même site que son apicultrice.
+
+
+## Étape 7.1 · Mesurer avant de copier
+
+`volume.sql` : 90 jours de mesures par ruche, une toutes les 30 minutes (`INSERT 0 47520`).
+
+<!-- IMG : INSERT 0 47520 -->
+<!-- ![Volume 7.1](../images/volume7-1.png) -->
+
+Tableau de bord du gestionnaire (UC-G01), site SN-CASA, `EXPLAIN ANALYZE` : 192 mesures par jour,
+Execution Time de l'ordre de 10 ms : _à compléter avec le temps mesuré_.
+
+<!-- IMG : EXPLAIN ANALYZE du tableau de bord (avant la vue) -->
+<!-- ![EXPLAIN avant 7.1](../images/explain-avant7-1.png) -->
+
+
+## Étape 7.2 · La synthèse, et son prix
+
+Vue matérialisée `synthese_site_jour`.
+
+- Temps sur la table `mesure` : _à compléter_ ms
+- Temps sur la vue : _à compléter_ ms (attendu moins de 0,2 ms)
+
+<!-- IMG : EXPLAIN ANALYZE du tableau de bord dans la vue -->
+<!-- ![EXPLAIN après 7.2](../images/explain-apres7-2.png) -->
+
+### Le vol (UC-CY04)
+
+Le 15 mars à 6 h, SN-CASA-011 passe à 8,4 kg. Le 15 mars n'apparaît dans la vue qu'après le `REFRESH`.
+
+<!-- IMG : insertion, vue avant REFRESH, REFRESH, vue après -->
+<!-- ![Vol 7.2](../images/vol7-2.png) -->
+
+Si la vue n'est rafraîchie que la nuit, le vol reste invisible jusqu'à : _à compléter_.
