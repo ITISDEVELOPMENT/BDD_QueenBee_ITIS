@@ -23,12 +23,11 @@ INSERT INTO formation_plat (telephone, theme, formateur) VALUES
 CREATE TABLE formateur (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     nom VARCHAR(50) UNIQUE NOT NULL,
-    theme VARCHAR(50) NOT NULL CHECK (theme IN ('varroa', 'recolte', 'capteurs')),
-    telephone VARCHAR(50) NOT NULL
+    theme VARCHAR(50) NOT NULL CHECK (theme IN ('varroa', 'recolte', 'capteurs'))
 );
 
 CREATE TABLE suivi_formation (
-    apicultrice_id uuid UNIQUE CONSTRAINT suivi_formation_apicultrice_fk REFERENCES apicultrice(id),
-    formateur_id uuid UNIQUE CONSTRAINT suivi_formation_formateur_fk REFERENCES formateur(id),
+    apicultrice_id uuid NOT NULL CONSTRAINT suivi_formation_apicultrice_fk REFERENCES apicultrice(id),
+    formateur_id uuid NOT NULL CONSTRAINT suivi_formation_formateur_fk REFERENCES formateur(id),
     PRIMARY KEY (apicultrice_id, formateur_id)
 );
