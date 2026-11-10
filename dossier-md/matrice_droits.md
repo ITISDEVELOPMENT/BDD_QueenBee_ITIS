@@ -47,7 +47,7 @@ Nos logins ont été renommés pour porter le nom du rôle PostgreSQL :
  `coord.sn` = coordinateur de SN-CASA,
  `admin.beeafrica` = l'administrateur,
  `gest.beeafrica` ajouté.
- 
+
 Les deux Aminata Diop deviennent `aminata.diop.casa` et `aminata.diop.kold` : `login` est maintenant `UNIQUE`.
 
 
@@ -57,10 +57,12 @@ Les deux Aminata Diop deviennent `aminata.diop.casa` et `aminata.diop.kold` : `l
 
 ## Étape 8.5 · `valider_recolte`
 
-_À compléter si besoin._
+Le coordinateur ne reçoit pas `UPDATE` sur `recolte` : il pourrait changer les quantités. Il passe par
+`valider_recolte`, une fonction `SECURITY DEFINER` qui ne valide qu'une récolte `déclarée` d'une ruche de son site,
+et qui est fermée à tous sauf `qb_coordinateur`. Revalider une récolte, ou en valider une d'un autre site, est refusé.
 
-<!-- IMG : validation par coord.sn, puis message d'erreur -->
-<!-- ![Validation 8.5](../images/validation8-5.png) -->
+![Validation 8.5](../images/matrice/validation8-5.png)
+
 
 ## Étape 8.6 · Tests de contournement
 
