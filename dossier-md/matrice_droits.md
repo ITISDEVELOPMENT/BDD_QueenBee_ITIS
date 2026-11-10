@@ -28,10 +28,9 @@ Avec `CASCADE` (dans un `BEGIN` / `ROLLBACK`), la même commande efface la ruche
 Le propriétaire (`postgres`) peut désactiver le trigger du journal (`ALTER TABLE journal_audit DISABLE TRIGGER journal_ajout_seul;`),
 puis le réactiver. C'est pourquoi le journal doit aussi être copié hors de la base (vers le SIEM du cahier des charges).
 
-![Audit 8.3](../images/matrice/audit8-3.png)
+![AUDIT 8.3](../images/matrice/audit8-3.png)
 
-<!-- IMG : UPDATE, DELETE, TRUNCATE sur le journal : trois refus -->
-<!-- ![Journal protégé 8.3](../images/journal-refus8-3.png) -->
+
 
 ## Étape 8.4 · La matrice (à remplir avant d'écrire le moindre GRANT)
 
@@ -45,11 +44,10 @@ puis le réactiver. C'est pourquoi le journal doit aussi être copié hors de la
 | comptes utilisateurs (UC-AD01) | ___ | ___ | ___ | ___ |
 | journal d'audit | ___ | ___ | ___ | lire |
 
-<!-- IMG : les groupes et les personnes (requête LIKE 'qb\_%', cinq lignes) -->
-<!-- ![Rôles 8.4](../images/roles8-4.png) -->
+![DROITS 8.4](../images/matrice/droits8-4.png)
 
-<!-- IMG : droits sur les vues (\dp) -->
-<!-- ![Droits 8.4](../images/droits8-4.png) -->
+![ROLES 8.4](../images/matrice/roles8-4.png)
+
 
 ## Étape 8.5 · `valider_recolte`
 
