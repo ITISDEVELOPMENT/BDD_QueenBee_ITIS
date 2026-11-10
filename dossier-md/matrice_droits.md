@@ -7,7 +7,7 @@
 | les deux clés de `adhesion` | `CASCADE` | lien sans valeur propre |
 | `ruche_id` de `mesure`, `inspection`, `recolte`, `alerte` | `RESTRICT` | ce sont des preuves, on ne doit pas les effacer en supprimant une ruche |
 
-Test : `DELETE FROM ruche WHERE code = 'CI-MAN-012';` est refusé par `mesure_ruche_fk`. 
+Test : `DELETE FROM ruche WHERE code = 'SN-CASA-099';` est refusé par `mesure_ruche_fk`. 
 Avec `CASCADE` (dans un `BEGIN` / `ROLLBACK`), la même commande efface la ruche et environ 4 368 mesures sans message.
 
 ![REFUS 8.1](../images/matrice/reference8-1.png) 
@@ -26,11 +26,8 @@ Avec `CASCADE` (dans un `BEGIN` / `ROLLBACK`), la même commande efface la ruche
 Le propriétaire (`postgres`) peut désactiver le trigger du journal (`ALTER TABLE journal_audit DISABLE TRIGGER journal_ajout_seul;`),
 puis le réactiver. C'est pourquoi le journal doit aussi être copié hors de la base (vers le SIEM du cahier des charges).
 
-<!-- IMG : UPDATE de la récolte puis lecture du journal (postgres | recolte | UPDATE | 12.5 | 14.0) -->
-<!-- ![Audit 8.3](../images/audit8-3.png) -->
+![Audit 8.3](../images/matrice/audit8-3.png)
 
-<!-- IMG : UPDATE, DELETE, TRUNCATE sur le journal : trois refus -->
-<!-- ![Journal protégé 8.3](../images/journal-refus8-3.png) -->
 
 ## Étape 8.4 · La matrice (à remplir avant d'écrire le moindre GRANT)
 
