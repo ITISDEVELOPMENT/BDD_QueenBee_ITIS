@@ -23,20 +23,29 @@ Nous avons pris SN-KOLD-011 : la SN-CASA-011 de l'énoncé n'existe pas chez nou
 
 ## Étape 9.2 · La course au jeton, dans deux terminaux
 
-Jeton `RT-f.ba-1` : 2 sessions ouvertes. _Tableau des temps à compléter :_
+`jeton.sql` crée les tables `jeton` et `session_app`, et 30 jetons pour f.ba (`RT-f.ba-1` à `RT-f.ba-30`, valables
+un jour). Course jouée avec `RT-f.ba-6`, deux terminaux psql :
 
 | Temps | Terminal A | Terminal B |
 |-------|------------|------------|
-| T1 | ___ | ___ |
-| T2 | ___ | ___ |
-| T3 | ___ | ___ |
-| T4 | ___ | ___ |
+| T1 | `BEGIN` | |
+| T2 | | `BEGIN` |
+| T3 | SELECT : RT-f.ba-6, `utilise_le` vide | |
+| T4 | | SELECT : RT-f.ba-6, `utilise_le` vide |
+| T5 | `UPDATE 1` | |
+| T6 | `INSERT 0 1` (session 1) | |
+| T7 | `COMMIT` | |
+| T8 | | `UPDATE 1` |
+| T9 | | `INSERT 0 1` (session 2) |
+| T10 | | `COMMIT` |
+| T11 | 2 sessions avec RT-f.ba-6 | |
 
-<!-- IMG : terminal A -->
-<!-- ![Terminal A 9.2](../images/course-a9-2.png) -->
+Les deux terminaux vérifient le jeton avant que l'un d'eux n'agisse : chacun le voit libre, et chacun ouvre une
+session. Un jeton prévu pour servir une fois a servi deux fois (race condition).
 
-<!-- IMG : terminal B -->
-<!-- ![Terminal B 9.2](../images/course-b9-2.png) -->
+Terminal A à gauche, terminal B à droite :
+
+![Course 9.2](../images/concurrence/Course-9-2.png)
 
 ## Étape 9.3 · La course par un programme
 
