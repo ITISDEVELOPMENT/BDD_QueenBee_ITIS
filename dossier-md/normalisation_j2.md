@@ -39,7 +39,8 @@ La table accepte la modification sans erreur : Moussa Sarr enseigne deux thèmes
 
 On découpe en `p1 (telephone, theme)` et `p2 (theme, formateur)`. La colonne commune `theme` n'est la clé
 d'aucun des deux morceaux : un thème a plusieurs formateurs. La jointure donne 16 lignes au lieu de 8, dont
-8 inventées. Par exemple, Fatou Ba (`+221 77 100 00 02`) serait suivie par trois formateurs varroa.
+8 inventées. Par exemple, Awa Diop (`+221 77 100 00 02`, Fatou Ba dans l'énoncé) serait suivie par trois
+formateurs varroa.
 
 ![Tbl_Temp 6.2](../images/table-temp6-2.png)
 
@@ -63,9 +64,9 @@ les deux sens : rien de perdu, rien d'inventé.
 
 ### La règle perdue
 
-Après le découpage, plus aucune table ne contient à la fois l'apicultrice et le thème : on a pu inscrire Fatou Ba
-chez Ibrahima Fall (varroa) alors qu'elle a déjà Moussa Sarr. 
-Résultat : `Fatou Ba | varroa | {"Moussa Sarr","Ibrahima Fall"}`.
+Après le découpage, plus aucune table ne contient à la fois l'apicultrice et le thème : on a pu inscrire Awa Diop
+(Fatou Ba dans l'énoncé) chez Ibrahima Fall (varroa) alors qu'elle a déjà Moussa Sarr.
+Résultat : `Awa Diop | varroa | {"Ibrahima Fall","Moussa Sarr"}`.
 
 ![INSERT 6.3](../images/regle-perdu6-3.png)
 
@@ -85,19 +86,19 @@ Résultat : `Fatou Ba | varroa | {"Moussa Sarr","Ibrahima Fall"}`.
 
 | Table | Dépendances | Partie gauche = super-clé ? | BCNF ? |
 |---|---|---|---|
-| site | id → nom, pays | oui | oui |
-| apicultrice | id → nom, telephone, site_id | oui | oui |
-| cooperative | id → nom, site_id | oui | oui |
-| adhesion | (apicultrice_id, cooperative_id) → date_adhesion | oui | oui |
-| ruche | id → tout ; code → tout ; apicultrice_id → site_id | non pour apicultrice_id | non (voir plus bas) |
-| alerte | id → tout | oui | oui |
-| mesure | id → tout ; (ruche_id, horodatage) → tout | oui | oui |
-| inspection | id → tout | oui | oui |
-| utilisateur | id → tout ; apicultrice_id → tout ; login → tout | oui | oui |
-| recolte | id → tout | oui | oui |
-| formateur | id → tout ; nom → tout | oui | oui |
+| site | id -> nom, pays | oui | oui |
+| apicultrice | id -> nom, telephone, site_id | oui | oui |
+| cooperative | id -> nom, site_id | oui | oui |
+| adhesion | (apicultrice_id, cooperative_id) -> date_adhesion | oui | oui |
+| ruche | id -> tout ; code -> tout ; apicultrice_id -> site_id | non pour apicultrice_id | non (voir plus bas) |
+| alerte | id -> tout | oui | oui |
+| mesure | id -> tout ; (ruche_id, horodatage) -> tout | oui | oui |
+| inspection | id -> tout | oui | oui |
+| utilisateur | id -> tout ; apicultrice_id -> tout ; login -> tout | oui | oui |
+| recolte | id -> tout | oui | oui |
+| formateur | id -> tout ; nom -> tout | oui | oui |
 | suivi_formation | (apicultrice_id, formateur_id), aucune autre colonne | oui | oui |
-| formation_plat | formateur → theme | **non** | **non** (3NF seulement, voir 6.1) |
+| formation_plat | formateur -> theme | **non** | **non** (3NF seulement, voir 6.1) |
 
 ![REVUE 6.4](../images/revue6-4.png)
 
@@ -113,7 +114,7 @@ et `apicultrice_id` n'est pas une clé de la table : `ruche` n'est donc pas en B
 Si quelqu'un change le site d'une ruche sans changer celui de l'apicultrice, la base l'accepte sans rien dire.
 
 Aujourd'hui, rien ne garantit cette cohérence dans notre schéma. Les deux `site_id` sont des clés étrangères
-séparées vers `site`. Le`tests_schema.sql` permet de voir s'il y a un écart, mais il ne bloque rien.
+séparées vers `site`. Le test 7 de `tests_schema.sql` permet de voir s'il y a un écart, mais il ne bloque rien.
 
 
 ## Étape 7.1 · Mesurer avant de copier
@@ -139,8 +140,8 @@ Vue matérialisée `synthese_site_jour`.
 
 ### Le vol (UC-CY04)
 
-Le 15 mars à 6 h, SN-CASA-011 passe à 8,4 kg. Le 15 mars n'apparaît dans la vue qu'après le `REFRESH`.
+Le 15 mars à 6 h, SN-CASA-014 passe à 8,4 kg (la SN-CASA-011 de l'énoncé n'existe pas chez nous). Le 15 mars n'apparaît dans la vue qu'après le `REFRESH`.
 
 ![VOL 7.2](../images/ajoutvol7-2.png)
 
-Si la vue n'est rafraîchie que la nuit, le vol reste invisible jusqu’au prochain rafraîchissement, soit plusieurs heures (jusqu’à 24 h au pire). Il faut donc détecter un vol dans les mesures brutes, pas dans la synthèse.
+Si la vue n'est rafraîchie que la nuit, le vol reste invisible jusqu'au prochain rafraîchissement, soit plusieurs heures (jusqu'à 24 h au pire). Il faut donc détecter un vol dans les mesures brutes, pas dans la synthèse.
