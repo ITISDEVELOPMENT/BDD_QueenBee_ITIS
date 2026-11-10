@@ -89,3 +89,49 @@ JOIN pg_roles r ON r.oid = m.member
 JOIN pg_roles g ON g.oid = m.roleid
 WHERE g.rolname LIKE 'qb\_%' ORDER BY 1, 2;
 -- Résultat : 5 lignes, une par personne
+
+
+
+-- 8.5
+CREATE OR REPLACE FUNCTION valider_recolte(p_recolte uuid) RETURNS void
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp AS $$
+DECLARE
+  v_coord utilisateur;
+  n int;
+BEGIN
+  SELECT * INTO v_coord FROM utilisateur WHERE login = qui();
+  IF v_coord.role IS DISTINCT FROM 'coordinateur' THEN
+    RAISE EXCEPTION 'seul un coordinateur peut valider une récolte';
+  END IF;
+
+  UPDATE recolte rc
+  SET statut = 'validée', validee_par = v_coord.id, date_validation = now()
+  FROM ruche r
+  WHERE rc.id = p_recolte
+    AND r.id = rc.ruche_id
+    AND r.site_id = v_coord.site_id
+    AND rc.statut = 'déclarée';
+
+  GET DIAGNOSTICS n = ROW_COUNT;
+  IF n = 0 THEN
+    RAISE EXCEPTION 'récolte introuvable, déjà traitée ou hors de votre site';
+  END IF;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION valider_recolte(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION valider_recolte(uuid) TO qb_coordinateur;
+
+-- Tests du 8.5
+BEGIN;
+SET ROLE "f.ba";
+INSERT INTO v_mes_recoltes (ruche_id, date_recolte, quantite_kg)
+SELECT id, '2026-11-10', 12.5 FROM v_mes_ruches;
+RESET ROLE;
+SET ROLE "coord.sn";
+SELECT valider_recolte(id) FROM v_recoltes_site WHERE statut = 'déclarée';
+SELECT ruche_code, quantite_kg, statut FROM v_recoltes_site ORDER BY ruche_code;
+SELECT valider_recolte(id) FROM v_recoltes_site WHERE ruche_code = 'SN-CASA-032';
+ROLLBACK;
+-- Résultat : la récolte de f.ba (SN-CASA-032) passe en validée, puis la revalider est refusé :
+-- ERREUR: récolte introuvable, déjà traitée ou hors de votre site

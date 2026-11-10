@@ -7,11 +7,10 @@
 | les deux clés de `adhesion` | `CASCADE` | lien sans valeur propre |
 | `ruche_id` de `mesure`, `inspection`, `recolte`, `alerte` | `RESTRICT` | ce sont des preuves, on ne doit pas les effacer en supprimant une ruche |
 
-Test : `DELETE FROM ruche WHERE code = 'CI-MAN-012';` est refusé par `mesure_ruche_fk`. 
+Test : `DELETE FROM ruche WHERE code = 'SN-CASA-099';` est refusé par `mesure_ruche_fk`. 
+Avec `CASCADE` (dans un `BEGIN` / `ROLLBACK`), la même commande efface la ruche et environ 4 368 mesures sans message.
 
 ![REFUS 8.1](../images/matrice/reference8-1.png) 
-
-Avec `CASCADE` (dans un `BEGIN` / `ROLLBACK`), la même commande efface la ruche et environ 4 368 mesures sans message.
 
 ![CASCADE 8.1](../images/matrice/cascade8-1.png) 
 
@@ -21,7 +20,6 @@ Avec `CASCADE` (dans un `BEGIN` / `ROLLBACK`), la même commande efface la ruche
 `check.sql` ajoute six contraintes `CHECK` (batterie, humidité, poids, rôle, statut d'alerte, statut de récolte).
 
 ![CHECK 8.1](../images/matrice/check8-2.png) 
-
 
 ## Étape 8.3 · Limite du journal d'audit
 
@@ -36,25 +34,35 @@ puis le réactiver. C'est pourquoi le journal doit aussi être copié hors de la
 
 | Objet | apicultrice | coordinateur | gestionnaire | admin |
 |-------|-------------|--------------|--------------|-------|
-| ses ruches et leurs mesures | lire | ___ | ___ | ___ |
-| déclarer une récolte | sur ses ruches | ___ | ___ | ___ |
-| valider une récolte (UC-C02) | non | ___ | ___ | ___ |
-| ruches et téléphones de son site | ___ | ___ | ___ | ___ |
-| synthèse et export (UC-G01, UC-G02) | ___ | ___ | ___ | ___ |
-| comptes utilisateurs (UC-AD01) | ___ | ___ | ___ | ___ |
-| journal d'audit | ___ | ___ | ___ | lire |
+| ses ruches et leurs mesures | lire (`v_mes_ruches`, `v_mes_mesures`) | non | non | non |
+| déclarer une récolte | sur ses ruches (`v_mes_recoltes`) | non | non | non |
+| valider une récolte (UC-C02) | non | sur son site (`valider_recolte`, 8.5) | non | non |
+| ruches et téléphones de son site | non | lire (`v_ruches_site`, `v_recoltes_site`) | non | non |
+| synthèse et export (UC-G01, UC-G02) | non | non | lire | non |
+| comptes utilisateurs (UC-AD01) | son compte (`v_moi`) | son compte | son compte | lire, créer, modifier (pas supprimer) |
+| journal d'audit | non | non | non | lire |
 
-![DROITS 8.4](../images/matrice/droits8-4.png)
+Nos logins ont été renommés pour porter le nom du rôle PostgreSQL :
+ `f.ba` = Fatou Sow,
+ `awa.diop` = Awa Diop,
+ `coord.sn` = coordinateur de SN-CASA,
+ `admin.beeafrica` = l'administrateur,
+ `gest.beeafrica` ajouté.
 
-![ROLES 8.4](../images/matrice/roles8-4.png)
+Les deux Aminata Diop deviennent `aminata.diop.casa` et `aminata.diop.kold` : `login` est maintenant `UNIQUE`.
 
+
+![Rôles 8.4](../images/matrice/roles8-4.png)
+
+![Droits 8.4](../images/matrice/droits8-4.png)
 
 ## Étape 8.5 · `valider_recolte`
 
-_À compléter si besoin._
+Le coordinateur ne reçoit pas `UPDATE` sur `recolte` : il pourrait changer les quantités. Il passe par
+`valider_recolte`, une fonction `SECURITY DEFINER` qui ne valide qu'une récolte `déclarée` d'une ruche de son site,
+et qui est fermée à tous sauf `qb_coordinateur`. Revalider une récolte, ou en valider une d'un autre site, est refusé.
 
-<!-- IMG : validation par coord.sn, puis message d'erreur -->
-<!-- ![Validation 8.5](../images/validation8-5.png) -->
+![Validation 8.5](../images/matrice/validation8-5.png)
 
 
 ## Étape 8.6 · Tests de contournement
