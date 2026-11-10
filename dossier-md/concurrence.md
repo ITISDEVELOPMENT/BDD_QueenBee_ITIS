@@ -2,8 +2,9 @@
 
 ## Étape 9.1 · L'action et sa trace ensemble
 
-1. `journal_appli` : l'UPDATE est refusé, mais le journal de l'application affirme la validation. _À compléter._
-2. Transaction : +1 ligne dans `journal_audit`, puis `current transaction is aborted` après `SELECT 1 / 0;`, tout revient après `ROLLBACK`.
+1. `journal_appli` : l'UPDATE est refusé, mais le journal de l'application affirme la validation.
+2. Transaction : +1 ligne dans `journal_audit`, puis `current transaction is aborted` après `SELECT 1 / 0;`, 
+tout revient après le `ROLLBACK`.
 
 <!-- IMG : journal_appli et UPDATE refusé -->
 <!-- ![Journal appli 9.1](../images/journal-appli9-1.png) -->
@@ -13,8 +14,7 @@
 
 ## Étape 9.2 · La course au jeton, dans deux terminaux
 
-Jeton `RT-f.ba-1` : 2 sessions ouvertes. _Tableau des temps à compléter :_
-
+Jeton `RT-f.ba-1` : 2 sessions ouvertes. 
 | Temps | Terminal A | Terminal B |
 |-------|------------|------------|
 | T1 | ___ | ___ |
