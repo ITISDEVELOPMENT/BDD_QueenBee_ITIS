@@ -1,15 +1,12 @@
--- 7.2
 CREATE MATERIALIZED VIEW synthese_site_jour AS
-SELECT site_id, jour, nb_mesures, poids_moyen, poids_min, batterie_min
-FROM (
-    SELECT site_id, 
-           DATE(horodatage) AS jour,
-           COUNT(*) AS nb_mesures,
-           AVG(poids_kg) AS poids_moyen,
-           MIN(poids_kg) AS poids_min,
-           MIN(batterie_pct) AS batterie_min
-    FROM mesure
-    GROUP BY site_id, DATE(horodatage)
-);
-CREATE UNIQUE INDEX synthese_site_jour_idx ON synthese_site_jour(site_id, jour);
-EXPLAIN ANALYZE;
+SELECT r.site_id,
+       (m.horodatage AT TIME ZONE 'UTC')::date AS jour,
+       count(*)            AS nb_mesures,
+       avg(m.poids_kg)     AS poids_moyen,
+       min(m.poids_kg)     AS poids_min,
+       min(m.batterie_pct) AS batterie_min
+FROM mesure m
+JOIN ruche r ON r.id = m.ruche_id
+GROUP BY r.site_id, (m.horodatage AT TIME ZONE 'UTC')::date;
+
+CREATE UNIQUE INDEX synthese_site_jour_pk ON synthese_site_jour (site_id, jour);
